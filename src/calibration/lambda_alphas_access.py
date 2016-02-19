@@ -1,5 +1,6 @@
 import cPickle as pickle
 import numpy as np
+from mpi4py import MPI
 
 lambda_file = 'src/calibration/lambda_alphas.pkl'
 
@@ -34,25 +35,27 @@ def print_all_lambdas():
 
 def save_lambda(lambda_val, test, null, alpha, upper):
 
-    with open(lambda_file, 'r') as f:
-        lambda_dict = pickle.load(f)
+    if MPI.COMM_WORLD.Get_rank() == 0:
 
-    if not test in lambda_dict:
-        lambda_dict[test] = {}
+        with open(lambda_file, 'r') as f:
+            lambda_dict = pickle.load(f)
 
-    if not null in lambda_dict[test]:
-        lambda_dict[test][null] = {}
+        if not test in lambda_dict:
+            lambda_dict[test] = {}
 
-    if not alpha in lambda_dict[test][null]:
-        lambda_dict[test][null][alpha] = np.nan*np.ones((2,))
+        if not null in lambda_dict[test]:
+            lambda_dict[test][null] = {}
 
-    lambda_dict[test][null][alpha][np.int(upper)] = lambda_val
+        if not alpha in lambda_dict[test][null]:
+            lambda_dict[test][null][alpha] = np.nan*np.ones((2,))
 
-    with open(lambda_file, 'w') as f:
-        pickle.dump(lambda_dict, f, -1)
+        lambda_dict[test][null][alpha][np.int(upper)] = lambda_val
 
-    print "Saved {} as {} bound for test {} with null hypothesis {} at alpha = {}".format(
-        lambda_val, 'upper' if upper else 'lower', null, alpha)
+        with open(lambda_file, 'w') as f:
+            pickle.dump(lambda_dict, f, -1)
+
+        print "Saved {} as {} bound for test {} with null hypothesis {} at alpha = {}".format(
+            lambda_val, 'upper' if upper else 'lower', test, null, alpha)
 
 if __name__ == '__main__':
     
