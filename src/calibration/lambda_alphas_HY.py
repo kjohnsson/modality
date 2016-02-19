@@ -1,7 +1,8 @@
 # lambda_alpha according to Hall & York 2001.
-
 import numpy as np
 import matplotlib.pyplot as plt
+
+from lambda_alphas_access import load_lambdas
 
 a1 = 0.94029
 a2 = -1.59914
@@ -17,5 +18,13 @@ print "lambda_al(0.05) = {}".format(lambda_al(0.05))
 
 alpha = np.linspace(0, 1)
 plt.plot(alpha, lambda_al(alpha))
-plt.scatter(0.05, 1.1273, marker='+', color='red')
+
+alphas_comp = [0.05, 0.1, 0.3]
+lambda_alphas_comp = []
+for i, alpha in enumerate(alphas_comp):
+    lambda_alphas_comp.append(load_lambdas('bw', 'normal', alpha))
+
+for alpha, lambda_alphas in zip(alphas_comp, lambda_alphas_comp):
+    plt.plot([alpha]*2, lambda_alphas)
+
 plt.show()

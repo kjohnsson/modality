@@ -3,8 +3,9 @@ from sklearn.neighbors import KernelDensity
 from scipy.stats import binom
 import matplotlib.pyplot as plt
 
-from .bandwidth_test import is_unimodal_kde, critical_bandwidth
-from .util.bootstrap_MPI import expected_value_above
+from .lambda_alphas_access import save_lambda
+from ..bandwidth_test import is_unimodal_kde, critical_bandwidth
+from ..util.bootstrap_MPI import expected_value_above
 
 
 class XSampleBW(object):
@@ -44,6 +45,8 @@ class XSampleShoulderBW(XSampleBW):
         self.h_crit = critical_bandwidth(data)
         self.kde_h_crit = KernelDensity(kernel='gaussian', bandwidth=self.h_crit).fit(data.reshape(-1, 1))
 
+sampling_dict = {'normal': XSampleBW, 'shoulder': XSampleShoulderBW}
+
 
 def print_bound_search(fun):
 
@@ -56,7 +59,9 @@ def print_bound_search(fun):
     return printfun
 
 
-def h_crit_scale_factor(alpha, sampling_class, lower_lambda=0, upper_lambda=2.0):
+def h_crit_scale_factor(alpha, null='normal', lower_lambda=0, upper_lambda=2.0):
+
+    sampling_class = sampling_dict[null]
 
     @print_bound_search
     def is_upper_bound_on_lambda(lambda_val):
@@ -67,12 +72,10 @@ def h_crit_scale_factor(alpha, sampling_class, lower_lambda=0, upper_lambda=2.0)
         return expected_value_above(lambda: sampling_class(N).probability_of_unimodal_above(lambda_val, 1-alpha), alpha)
 
     def save_upper(lambda_bound):
-        print "upper lambda bound = {}".format(lambda_bound)
-        np.save('upper_lambda_{}'.format(alpha), lambda_bound)
+        save_lambda(lambda_bound, 'bw', null, alpha, upper=True)
 
     def save_lower(lambda_bound):
-        print "lower lambda bound = {}".format(lambda_bound)
-        np.save('lower_lambda_{}'.format(alpha), lambda_bound)
+        save_lambda(lambda_bound, 'bw', null, alpha, upper=False)
 
     lambda_tol = 1e-4
 
