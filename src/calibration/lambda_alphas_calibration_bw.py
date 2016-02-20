@@ -5,7 +5,7 @@ import matplotlib.pyplot as plt
 
 from .lambda_alphas_access import save_lambda
 from ..bandwidth_test import is_unimodal_kde, critical_bandwidth
-from ..util.bootstrap_MPI import expected_value_above
+from ..util.bootstrap_MPI import probability_above
 
 
 class XSampleBW(object):
@@ -28,7 +28,7 @@ class XSampleBW(object):
                          = P(\hat h_{crit}^* <= \lambda*\hat h_{crit})
                          = P(KDE(X^*, \lambda*\hat h_{crit}) is unimodal)
         '''
-        return expected_value_above(lambda: self.is_unimodal_resample(lambda_val), gamma, max_samp=5000, mpi=True)
+        return probability_above(lambda: self.is_unimodal_resample(lambda_val), gamma, max_samp=5000, mpi=True)
 
 
 class XSampleShoulderBW(XSampleBW):
@@ -69,7 +69,7 @@ def h_crit_scale_factor(alpha, null='normal', lower_lambda=0, upper_lambda=2.0):
             P(P(G_n(lambda)) > 1 - alpha) > alpha
                 => lambda is upper bound on lambda_alpha
         '''
-        return expected_value_above(lambda: sampling_class(N).probability_of_unimodal_above(lambda_val, 1-alpha), alpha)
+        return probability_above(lambda: sampling_class(N).probability_of_unimodal_above(lambda_val, 1-alpha), alpha)
 
     def save_upper(lambda_bound):
         save_lambda(lambda_bound, 'bw', null, alpha, upper=True)

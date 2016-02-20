@@ -19,7 +19,7 @@ print "lambda_al(0.05) = {}".format(lambda_al(0.05))
 alpha = np.linspace(0, 1)
 plt.plot(alpha, lambda_al(alpha))
 
-alphas_comp = [0.05, 0.1, 0.3]
+alphas_comp = [0.01, 0.05, 0.1, 0.3]
 lambda_alphas_comp = []
 for i, alpha in enumerate(alphas_comp):
     lambda_alphas_comp.append(load_lambdas('bw', 'normal', alpha))
