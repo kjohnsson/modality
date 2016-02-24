@@ -11,16 +11,17 @@ from ..util.bootstrap_MPI import probability_above
 class XSampleBW(object):
 
     def __init__(self, N):
+        self.I = (-1.5, 1.5)  # avoiding spurious bumps in the tails
         self.N = N
         data = np.random.randn(N)
-        data = data[np.abs(data) < 1.5]  # avoiding spurious bumps in the tails
-        self.h_crit = critical_bandwidth(data)
+        self.var = np.var(data)
+        self.h_crit = critical_bandwidth(data, self.I)
         self.kde_h_crit = KernelDensity(kernel='gaussian', bandwidth=self.h_crit).fit(data.reshape(-1, 1))
 
     def is_unimodal_resample(self, lambda_val):
-        data = self.kde_h_crit.sample(self.N).reshape(-1)
-        data = data[np.abs(data) < 1.5]  # avoiding spurious bumps in the tails
-        return is_unimodal_kde(self.h_crit*lambda_val, data)
+        data = self.kde_h_crit.sample(self.N).reshape(-1)/np.sqrt(1+self.h_crit**2/self.var)
+        #print "np.var(data)/self.var = {}".format(np.var(data)/self.var)
+        return is_unimodal_kde(self.h_crit*lambda_val, data, self.I)
 
     def probability_of_unimodal_above(self, lambda_val, gamma):
         '''
@@ -34,6 +35,7 @@ class XSampleBW(object):
 class XSampleShoulderBW(XSampleBW):
 
     def __init__(self, N):
+        self.I = (-1.5, 1.5) # CHECK: Is appropriate bound?
         self.N = N
         N1 = binom.rvs(N, 1.0/17)
         print "N1 = {}".format(N1)
@@ -41,7 +43,7 @@ class XSampleShoulderBW(XSampleBW):
         m1 = -1.25
         s1 = 0.25
         data = np.hstack([s1*np.random.randn(N1)+m1, np.random.randn(N2)])
-        data = data[np.abs(data) < 1.5]
+        self.var = np.var(data)
         self.h_crit = critical_bandwidth(data)
         self.kde_h_crit = KernelDensity(kernel='gaussian', bandwidth=self.h_crit).fit(data.reshape(-1, 1))
 
@@ -115,4 +117,7 @@ if __name__ == '__main__':
         x = np.linspace(-2, 2)
         plt.plot(x, np.exp(xsamp.kde_h_crit.score_samples(x.reshape(-1, 1))))
         plt.show()
+
+    if 1:
+        XSampleBW(10000).is_unimodal_resample(1)
 

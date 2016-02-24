@@ -17,12 +17,13 @@ def silverman_bandwidth_pval(data, N_bootstrap=1000):
     return np.mean(~smaller_equal_crit_bandwidth)
 
 
-def critical_bandwidth(data, htol=1e-3):
+def critical_bandwidth(data, I=(-np.inf, np.inf), htol=1e-3):
+        # I is interval over which density is tested for unimodality
     hmax = (np.max(data)-np.min(data))/2.0
-    return bisection_search_unimodal(0, hmax, htol, data)
+    return bisection_search_unimodal(0, hmax, htol, data, I)
 
 
-def bisection_search_unimodal(hmin, hmax, htol, data):
+def bisection_search_unimodal(hmin, hmax, htol, data, I):
     '''
         Assuming fun(xmax) < 0.
     '''
@@ -30,15 +31,16 @@ def bisection_search_unimodal(hmin, hmax, htol, data):
         return (hmin + hmax)/2.0
     hnew = (hmin + hmax)/2.0
     #print "hnew = {}".format(hnew)
-    if is_unimodal_kde(hnew, data):  # upper bound for bandwidth
-        return bisection_search_unimodal(hmin, hnew, htol, data)
-    return bisection_search_unimodal(hnew, hmax, htol, data)
+    if is_unimodal_kde(hnew, data, I):  # upper bound for bandwidth
+        return bisection_search_unimodal(hmin, hnew, htol, data, I)
+    return bisection_search_unimodal(hnew, hmax, htol, data, I)
 
 
-def is_unimodal_kde(h, data):
+def is_unimodal_kde(h, data, I=(-np.inf, np.inf)):
+    # I is interval over which density is tested for unimodality
     xtol = h*0.1  # TODO: Compute error given xtol.
     kde = KDE(data, h)
-    x_new = np.linspace(np.min(data), np.max(data), 10)
+    x_new = np.linspace(max(I[0], np.min(data)), min(I[1], np.max(data)), 10)
     x = np.zeros(0,)
     y = np.zeros(0,)
     while True:
@@ -66,7 +68,7 @@ def merge_into(z_new, z):
 
 if __name__ == '__main__':
 
-    if 1:
+    if 0:
         import time
         N = 1000
         data = np.hstack([np.random.randn(N/2), np.random.randn(N/4)+4])
@@ -88,9 +90,9 @@ if __name__ == '__main__':
         ax.plot(x_grid, KDE(data, h_crit).evaluate(x_grid), linewidth=2, color='black')
         plt.show()
 
-    if 0:
+    if 1:
         data = np.random.randn(1000)
         h = .5
         print "np.std(data) = {}".format(np.std(data))
-        resamp = KernelDensity(kernel='gaussian', bandwidth=h).fit(data).sample(1000)/np.sqrt((1+h**2/np.var(data)))
+        resamp = KernelDensity(kernel='gaussian', bandwidth=h).fit(data).sample(1000)/np.sqrt(1+h**2/np.var(data))
         print "np.std(resamp) = {}".format(np.std(resamp))

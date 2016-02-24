@@ -14,17 +14,18 @@ a7 = 0.42423
 
 lambda_al = lambda alpha: (a1*alpha**3 + a2*alpha**2 + a3*alpha + a4)/(alpha**3 + a5*alpha**2 + a6*alpha + a7)
 
-print "lambda_al(0.05) = {}".format(lambda_al(0.05))
+print "lambda_al(0.1) = {}".format(lambda_al(0.1))
 
 alpha = np.linspace(0, 1)
 plt.plot(alpha, lambda_al(alpha))
 
-alphas_comp = [0.01, 0.05, 0.1, 0.3]
+alphas_comp = [0.01, 0.04, 0.05, 0.1, 0.3]
 lambda_alphas_comp = []
 for i, alpha in enumerate(alphas_comp):
     lambda_alphas_comp.append(load_lambdas('bw', 'normal', alpha))
+print "lambda_alphas_comp = {}".format(lambda_alphas_comp)
 
 for alpha, lambda_alphas in zip(alphas_comp, lambda_alphas_comp):
-    plt.plot([alpha]*2, lambda_alphas)
+    plt.plot([alpha]*2, lambda_alphas, linewidth=4)
 
 plt.show()

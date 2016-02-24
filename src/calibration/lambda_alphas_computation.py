@@ -4,7 +4,7 @@ from lambda_alphas_calibration_bw import h_crit_scale_factor, XSampleBW, XSample
 
 t0 = time.time()
 
-print "h_crit_scale_factor(0.10) = {}".format(h_crit_scale_factor(0.10))
+print "h_crit_scale_factor(0.04) = {}".format(h_crit_scale_factor(0.04))
 
 t1 = time.time()
 
