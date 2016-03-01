@@ -16,8 +16,10 @@ lambda_al = lambda alpha: (a1*alpha**3 + a2*alpha**2 + a3*alpha + a4)/(alpha**3 
 
 print "lambda_al(0.1) = {}".format(lambda_al(0.1))
 
+fig, ax = plt.subplots()
+
 alpha = np.linspace(0, 1)
-plt.plot(alpha, lambda_al(alpha))
+ax.plot(alpha, lambda_al(alpha))
 
 alphas_comp = [0.01, 0.04, 0.05, 0.1, 0.3]
 lambda_alphas_comp = []
@@ -26,6 +28,8 @@ for i, alpha in enumerate(alphas_comp):
 print "lambda_alphas_comp = {}".format(lambda_alphas_comp)
 
 for alpha, lambda_alphas in zip(alphas_comp, lambda_alphas_comp):
-    plt.plot([alpha]*2, lambda_alphas, linewidth=4)
+    ax.plot([alpha]*2, lambda_alphas, linewidth=4)
+    ax.scatter([alpha]*2, lambda_alphas, marker='+', s=3)
 
-plt.show()
+fig.savefig('lambda_alpha.pdf', format='pdf', bbox_inches='tight')
+#plt.show()

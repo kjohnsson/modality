@@ -31,14 +31,13 @@ def bootstrap_mpi(fun, N, dtype=np.float_, *args):
     return res
 
 
-def probability_above(fun_resample, gamma, max_samp=None, mpi=False):
+def probability_above(fun_resample, gamma, max_samp=None, mpi=False, batch=5):
     '''
         Returns True if P(fun_resample()) is significantly above gamma,
         returns False if P(fun_resample()) is significantly below gamma.
         Increases samples size until significance is obtained.
         (null hypothesis is p = gamma).
     '''
-    batch = 20
     bound_significance = 0.01
     vals = np.zeros((0,))
     while True:
@@ -48,21 +47,24 @@ def probability_above(fun_resample, gamma, max_samp=None, mpi=False):
             vals_new_samp = bootstrap_mpi(fun_resample, batch)
         vals_new_samp = vals_new_samp[~np.isnan(vals_new_samp)]
         vals = np.hstack([vals, vals_new_samp])
-        bound_pval = binom.cdf(np.sum(vals), len(vals), gamma)
-        if rank == 0:
+        upper_bound_pval = binom.cdf(np.sum(vals), len(vals), gamma)
+        lower_bound_pval = 1 - binom.cdf(np.sum(vals)-1, len(vals), gamma)
+        if not mpi or rank == 0:
             print ("gamma = {}".format(gamma)+"\nnp.mean(vals) = {}".format(np.mean(vals)) +
-                   "\nlen(vals) = {}".format(len(vals))+"\nbound_pval = {}".format(bound_pval))
-        if bound_pval < bound_significance:
-            if rank == 0:
+                   "\nlen(vals) = {}".format(len(vals)) +
+                   "\nupper_bound_pval = {}".format(upper_bound_pval) +
+                   "\nlower_bound_pval = {}".format(lower_bound_pval))
+        if upper_bound_pval <= bound_significance:
+            if not mpi or rank == 0:
                 print "---"
             return False  # we have lower bound instead.
-        if bound_pval > 1-bound_significance:
-            if rank == 0:
+        if lower_bound_pval <= bound_significance:
+            if not mpi or rank == 0:
                 print "---"
             return True
         if not max_samp is None:
             if len(vals) > max_samp:
-                if rank == 0:
+                if not mpi or rank == 0:
                     print "---"
                 return np.nan
         batch = len(vals)
