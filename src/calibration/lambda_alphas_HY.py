@@ -21,15 +21,18 @@ fig, ax = plt.subplots()
 alpha = np.linspace(0, 1)
 ax.plot(alpha, lambda_al(alpha))
 
-alphas_comp = [0.01, 0.04, 0.05, 0.1, 0.3]
+#alphas_comp = [0.01, 0.04, 0.05, 0.1, 0.3]
+alphas_comp = [0.05]
+test = 'bw'
+null = 'shoulder'
 lambda_alphas_comp = []
 for i, alpha in enumerate(alphas_comp):
-    lambda_alphas_comp.append(load_lambdas('bw', 'normal', alpha))
+    lambda_alphas_comp.append(load_lambdas(test, null, alpha))
 print "lambda_alphas_comp = {}".format(lambda_alphas_comp)
 
 for alpha, lambda_alphas in zip(alphas_comp, lambda_alphas_comp):
     ax.plot([alpha]*2, lambda_alphas, linewidth=4)
     ax.scatter([alpha]*2, lambda_alphas, marker='+', s=3)
 
-fig.savefig('lambda_alpha.pdf', format='pdf', bbox_inches='tight')
+fig.savefig('lambda_alpha_{}_{}.pdf'.format(test, null), format='pdf', bbox_inches='tight')
 #plt.show()
