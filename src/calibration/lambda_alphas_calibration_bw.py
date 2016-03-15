@@ -35,10 +35,10 @@ class XSampleBW(object):
 class XSampleShoulderBW(XSampleBW):
 
     def __init__(self, N):
-        self.I = (-1.5, 1.5) # CHECK: Is appropriate bound?
+        self.I = (-1.5, 1.5)  # CHECK: Is appropriate bound? OK.
         self.N = N
         N1 = binom.rvs(N, 1.0/17)
-        print "N1 = {}".format(N1)
+        #print "N1 = {}".format(N1)
         N2 = N - N1
         m1 = -1.25
         s1 = 0.25
@@ -112,12 +112,16 @@ if __name__ == '__main__':
     if 0:
         print "h_crit_scale_factor(0.30, 0, 2.0) = {}".format(h_crit_scale_factor(0.30, 0, 2.0))  # alpha=0.05 => lambda_alpha=1.12734985352
 
-    if 0:
-        xsamp = XSampleShoulderBW(100000)
+    if 1:
+        xsamp = XSampleShoulderBW(10000)
         x = np.linspace(-2, 2)
-        plt.plot(x, np.exp(xsamp.kde_h_crit.score_samples(x.reshape(-1, 1))))
+        fig, ax = plt.subplots()
+        ax.plot(x, np.exp(xsamp.kde_h_crit.score_samples(x.reshape(-1, 1))))
+        ax.axvline(-1.6)
+        ax.axvline(1.5)
         plt.show()
 
-    if 1:
+    if 0:
         XSampleBW(10000).is_unimodal_resample(1)
+
 
