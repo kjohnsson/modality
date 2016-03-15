@@ -43,6 +43,7 @@ class XSampleShoulderBW(XSampleBW):
         m1 = -1.25
         s1 = 0.25
         data = np.hstack([s1*np.random.randn(N1)+m1, np.random.randn(N2)])
+        self.data = data
         self.var = np.var(data)
         self.h_crit = critical_bandwidth(data)
         self.kde_h_crit = KernelDensity(kernel='gaussian', bandwidth=self.h_crit).fit(data.reshape(-1, 1))
@@ -117,7 +118,13 @@ if __name__ == '__main__':
         x = np.linspace(-2, 2)
         fig, ax = plt.subplots()
         ax.plot(x, np.exp(xsamp.kde_h_crit.score_samples(x.reshape(-1, 1))))
-        ax.axvline(-1.6)
+        ax.axvline(-2)
+        ax.axvline(1.5)
+        kde_h = KernelDensity(kernel='gaussian', bandwidth=xsamp.h_crit*0.8).fit(xsamp.data.reshape(-1, 1))
+        print "is_unimodal_kde(xsamp.data) = {}".format(is_unimodal_kde(xsamp.h_crit*0.8, xsamp.data, (-1.5, 1.5)))
+        fig, ax = plt.subplots()
+        ax.plot(x, np.exp(kde_h.score_samples(x.reshape(-1, 1))))
+        ax.axvline(-2)
         ax.axvline(1.5)
         plt.show()
 
