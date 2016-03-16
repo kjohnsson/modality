@@ -139,7 +139,7 @@ if __name__ == '__main__':
         plt.plot(x, np.exp(y))
         plt.show()
 
-    if 1:
+    if 0:
         N = 1000
         data = np.hstack([np.random.randn(N/2), np.random.randn(N/4)+3])
         if 1:
@@ -150,6 +150,27 @@ if __name__ == '__main__':
 
         x = np.linspace(-3, 8, 200)
         print "x.shape = {}".format(x.shape)
+        y = KernelDensity(kernel='gaussian', bandwidth=0.2).fit(data.reshape(-1, 1)).score_samples(x.reshape(-1, 1))
+        plt.plot(x, np.exp(y))
+        plt.show()
+
+    if 1:
+        from .bandwidth_fm_test import find_reference_distr
+        seed = np.random.randint(1000)
+        print "seed = {}".format(seed)
+        np.random.seed(seed)
+        mtol = 0.001
+        a = find_reference_distr(mtol)
+        print "a = {}".format(a)
+        N = 2000
+        data = np.hstack([np.random.randn(N/2), np.random.randn(N/4)+a])
+        if 1:
+            I = (-1.5, a+1.5)
+            print "pval_silverman(data, I) = {}".format(pval_silverman(data, I))
+            print "reject_null_calibrated_test_bandwidth(data, 0.05, 'normal', I) = {}".format(reject_null_calibrated_test_bandwidth(data, 0.05, 'normal', I))
+            print "reject_null_calibrated_test_bandwidth(data, 0.05, 'shoulder', I) = {}".format(reject_null_calibrated_test_bandwidth(data, 0.05, 'shoulder', I))
+
+        x = np.linspace(-3, 8, 200)
         y = KernelDensity(kernel='gaussian', bandwidth=0.2).fit(data.reshape(-1, 1)).score_samples(x.reshape(-1, 1))
         plt.plot(x, np.exp(y))
         plt.show()

@@ -5,6 +5,7 @@ import matplotlib.pyplot as plt
 
 from .lambda_alphas_access import save_lambda
 from ..bandwidth_test import is_unimodal_kde, critical_bandwidth
+from ..bandwidth_fm_test import find_reference_distr, fisher_marron_critical_bandwidth, is_unimodal_kde as is_unimodal_kde_fm
 from ..util.bootstrap_MPI import probability_above
 
 
@@ -48,7 +49,40 @@ class XSampleShoulderBW(XSampleBW):
         self.h_crit = critical_bandwidth(data, self.I)
         self.kde_h_crit = KernelDensity(kernel='gaussian', bandwidth=self.h_crit).fit(data.reshape(-1, 1))
 
-sampling_dict = {'normal': XSampleBW, 'shoulder': XSampleShoulderBW}
+
+def get_fm_sampling_class(mtol):
+
+    a = find_reference_distr(mtol)
+
+    class XSampleFMBW(XSampleBW):
+
+        def __init__(self, N):
+            self.I = (-1.5, a+1.5)  # CHECK: Is appropriate bound? OK.
+            self.lamtol = 0
+            self.mtol = mtol
+            self.N = N
+            N1 = binom.rvs(N, 2.0/3)
+            #print "N1 = {}".format(N1)
+            N2 = N - N1
+            data = np.hstack([np.random.randn(N1), np.random.randn(N2)+a])
+            self.data = data
+            self.var = np.var(data)
+            self.h_crit = fisher_marron_critical_bandwidth(data, self.lamtol, self.mtol, self.I)
+            self.kde_h_crit = KernelDensity(kernel='gaussian', bandwidth=self.h_crit).fit(data.reshape(-1, 1))
+
+        def is_unimodal_resample(self, lambda_val):
+            data = self.kde_h_crit.sample(self.N).reshape(-1)/np.sqrt(1+self.h_crit**2/self.var)
+            #print "np.var(data)/self.var = {}".format(np.var(data)/self.var)
+            return is_unimodal_kde_fm(self.h_crit*lambda_val, data, self.lamtol, self.mtol, self.I)
+
+    return XSampleFMBW
+
+
+def get_sampling_class(null, **kwargs):
+    if null == 'fm':
+        return get_fm_sampling_class(**kwargs)
+    sampling_dict = {'normal': XSampleBW, 'shoulder': XSampleShoulderBW}
+    return sampling_dict[null]
 
 
 def print_bound_search(fun):
@@ -62,9 +96,9 @@ def print_bound_search(fun):
     return printfun
 
 
-def h_crit_scale_factor(alpha, null='normal', lower_lambda=0, upper_lambda=2.0):
+def h_crit_scale_factor(alpha, null='normal', lower_lambda=0, upper_lambda=2.0, **samp_class_args):
 
-    sampling_class = sampling_dict[null]
+    sampling_class = get_sampling_class(null, **samp_class_args)
 
     @print_bound_search
     def is_upper_bound_on_lambda(lambda_val):

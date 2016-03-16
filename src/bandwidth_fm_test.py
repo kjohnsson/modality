@@ -18,36 +18,36 @@ except NameError:
         return fun
 
 
-def bandwidth_test_pval(data, lamtol, mtol, N_bootstrap=1000):
+def bandwidth_test_pval(data, lamtol, mtol, I=(-np.inf, np.inf), N_bootstrap=1000):
     lambda_alpha = 1  # TODO: Replace with correct value according to Cheng & Hall methodology
-    h_crit = fisher_marron_critical_bandwidth(data, lamtol, mtol)
+    h_crit = fisher_marron_critical_bandwidth(data, lamtol, mtol, I)
     KDE_h_crit = KernelDensity(kernel='gaussian', bandwidth=h_crit).fit(data.reshape(-1, 1))
     resampling_scale_factor = 1.0/np.sqrt(1+h_crit**2/np.var(data))
     smaller_equal_crit_bandwidth = np.zeros((N_bootstrap,), dtype=np.bool_)
     for n in range(N_bootstrap):  # CHECK: Rescale bootstrap sample towards the mean?
         smaller_equal_crit_bandwidth[n] = is_resampled_unimodal_kde(
-            KDE_h_crit, resampling_scale_factor, len(data), h_crit*lambda_alpha, lamtol, mtol)
+            KDE_h_crit, resampling_scale_factor, len(data), h_crit*lambda_alpha, lamtol, mtol, I)
     return np.mean(~smaller_equal_crit_bandwidth)
 
 
 @MC_error_check
-def bandwidth_test_pval_mpi(data, lamtol, mtol, N_bootstrap=1000):
+def bandwidth_test_pval_mpi(data, lamtol, mtol, I=(-np.inf, np.inf), N_bootstrap=1000):
     lambda_alpha = 1  # TODO: Replace with correct value according to Cheng & Hall methodology
-    h_crit = fisher_marron_critical_bandwidth(data, lamtol, mtol)
+    h_crit = fisher_marron_critical_bandwidth(data, lamtol, mtol, I)
     KDE_h_crit = KernelDensity(kernel='gaussian', bandwidth=h_crit).fit(data.reshape(-1, 1))
     resampling_scale_factor = 1.0/np.sqrt(1+h_crit**2/np.var(data))
     smaller_equal_crit_bandwidth = bootstrap(
         is_resampled_unimodal_kde, N_bootstrap, KDE_h_crit,
-        resampling_scale_factor, len(data), h_crit*lambda_alpha, lamtol, mtol)
+        resampling_scale_factor, len(data), h_crit*lambda_alpha, lamtol, mtol, I)
     return np.mean(~smaller_equal_crit_bandwidth)
 
 
-def fisher_marron_critical_bandwidth(data, lamtol, mtol, htol=1e-3):
+def fisher_marron_critical_bandwidth(data, lamtol, mtol, I=(-np.inf, np.inf), htol=1e-3):
     hmax = (np.max(data)-np.min(data))/2.0
-    return bisection_search_unimodal(0, hmax, htol, data, lamtol, mtol)
+    return bisection_search_unimodal(0, hmax, htol, data, lamtol, mtol, I)
 
 
-def bisection_search_unimodal(hmin, hmax, htol, data, lamtol, mtol):
+def bisection_search_unimodal(hmin, hmax, htol, data, lamtol, mtol, I=(-np.inf, np.inf)):
     '''
         Assuming fun(xmax) < 0.
     '''
@@ -55,22 +55,22 @@ def bisection_search_unimodal(hmin, hmax, htol, data, lamtol, mtol):
         return (hmin + hmax)/2.0
     hnew = (hmin + hmax)/2.0
     #print "hnew = {}".format(hnew)
-    if is_unimodal_kde(hnew, data, lamtol, mtol):  # upper bound for bandwidth
-        return bisection_search_unimodal(hmin, hnew, htol, data, lamtol, mtol)
-    return bisection_search_unimodal(hnew, hmax, htol, data, lamtol, mtol)
+    if is_unimodal_kde(hnew, data, lamtol, mtol, I):  # upper bound for bandwidth
+        return bisection_search_unimodal(hmin, hnew, htol, data, lamtol, mtol, I)
+    return bisection_search_unimodal(hnew, hmax, htol, data, lamtol, mtol, I)
 
 
-def is_resampled_unimodal_kde(kde, resampling_scale_factor, n, h, lamtol, mtol):
-    return is_unimodal_kde(h, kde.sample(n).ravel()*resampling_scale_factor, lamtol, mtol)
+def is_resampled_unimodal_kde(kde, resampling_scale_factor, n, h, lamtol, mtol, I=(-np.inf, np.inf)):
+    return is_unimodal_kde(h, kde.sample(n).ravel()*resampling_scale_factor, lamtol, mtol, I)
 
 
 @profile
-def is_unimodal_kde(h, data, lamtol, mtol, debug=False):
+def is_unimodal_kde(h, data, lamtol, mtol, I=(-np.inf, np.inf), debug=False):
     xtol = h*0.1  # TODO: Compute error given xtol.
     kde = KDE(data, h)
     lamtol_prop = lamtol*kde._norm_factor  # scaled with same proportionality constant as kde
     #print "lamtol_prop = {}".format(lamtol_prop)
-    x_new = np.linspace(np.min(data), np.max(data), 40)
+    x_new = np.linspace(max(np.min(data), I[0]), min(np.max(data), I[1]), 40)
     x = np.zeros(0,)
     y = np.zeros(0,)
     zero = np.zeros(1,)
@@ -194,7 +194,24 @@ def is_unimodal_kde(h, data, lamtol, mtol, debug=False):
                     print "li = {}".format(li)
                     print "(start, end) = {}".format((start, end))
                     lambd = lambdas[li]
-                    axs[1].plot([x_left, x_right], [lambd/kde._norm_factor]*2)                
+                    axs[1].plot([x_left, x_right], [lambd/kde._norm_factor]*2)
+
+
+def find_reference_distr(mtol):
+    return bisection_search_reference_distr(0, 4, mtol)
+
+
+def bisection_search_reference_distr(amin, amax, mtol, atol=1e-6):
+
+    anew = (amin + amax)/2.0
+    if amax - amin < atol:
+        return anew
+
+    data = np.array([0, 0, anew])
+    if is_unimodal_kde(1, data, 0, mtol):
+        return bisection_search_reference_distr(anew, amax, mtol, atol)
+
+    return bisection_search_reference_distr(amin, anew, mtol, atol)
 
 
 def merge_into(z_new, z):
