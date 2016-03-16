@@ -141,8 +141,8 @@ if __name__ == '__main__':
 
     if 1:
         N = 1000
-        data = np.hstack([np.random.randn(N/2), np.random.randn(N/4)+4])
-        if 0:
+        data = np.hstack([np.random.randn(N/2), np.random.randn(N/4)+3])
+        if 1:
             I = (-1.5, 5.5)
             print "pval_silverman(data, I) = {}".format(pval_silverman(data, I))
             print "reject_null_calibrated_test_bandwidth(data, 0.05, 'normal', I) = {}".format(reject_null_calibrated_test_bandwidth(data, 0.05, 'normal', I))
@@ -150,6 +150,6 @@ if __name__ == '__main__':
 
         x = np.linspace(-3, 8, 200)
         print "x.shape = {}".format(x.shape)
-        y = KernelDensity(kernel='gaussian', bandwidth=0.1).fit(data.reshape(-1, 1)).score_samples(x.reshape(-1, 1))
+        y = KernelDensity(kernel='gaussian', bandwidth=0.2).fit(data.reshape(-1, 1)).score_samples(x.reshape(-1, 1))
         plt.plot(x, np.exp(y))
         plt.show()
