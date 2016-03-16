@@ -11,12 +11,12 @@ def best_split(data, I=(-np.inf, np.inf)):
     '''
     h_crit = critical_bandwidth_m_modes(data, 2, I)
     kde = KernelDensity(kernel='gaussian', bandwidth=h_crit).fit(data.reshape(-1, 1))
-    x = np.linspace(np.min(data), np.max(data), 1000)
+    x = np.linspace(max(np.min(data), I[0]), min(np.max(data), I[1]), 200)
     y = np.exp(kde.score_samples(x.reshape(-1, 1)))
     modes = argrelextrema(np.hstack([[0], y, [0]]), np.greater)[0]
     if len(modes) != 2:
-        raise ValueError
-    ind_min = modes[0] + argrelextrema(y[modes[0]:modes[1]], np.less)[0]
+        raise ValueError("{} modes at: {}".format(len(modes), x[modes-1]))
+    ind_min = modes[0]-1 + argrelextrema(y[(modes[0]-1):(modes[1]-1)], np.less)[0]
     return x[ind_min]
 
 if __name__ == '__main__':
@@ -29,5 +29,5 @@ if __name__ == '__main__':
         y = KernelDensity(kernel='gaussian', bandwidth=h_crit).fit(data.reshape(-1, 1)).score_samples(x.reshape(-1, 1))
         fig, ax = plt.subplots()
         ax.plot(x, np.exp(y))
-        ax.axvline(best_split(data), color='red')
+        ax.axvline(best_split(data, (1, 4)), color='red')
         plt.show()

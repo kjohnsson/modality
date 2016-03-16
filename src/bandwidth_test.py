@@ -68,7 +68,7 @@ def is_unimodal_kde(h, data, I=(-np.inf, np.inf)):
 
 def kde_has_at_most_m_modes(h, data, m, I=(-np.inf, np.inf)):
     # I is interval over which density is tested for unimodality
-    xtol = h*0.1  # TODO: Compute error given xtol.
+    xtol = h*0.05  # TODO: Compute error given xtol.
     kde = KDE(data, h)
     x_new = np.linspace(max(I[0], np.min(data)), min(I[1], np.max(data)), 10)
     x = np.zeros(0,)
