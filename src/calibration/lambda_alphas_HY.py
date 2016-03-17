@@ -2,7 +2,9 @@
 import numpy as np
 import matplotlib.pyplot as plt
 
-from lambda_alphas_access import load_lambdas
+from .lambda_alphas_access import load_lambdas, print_all_lambdas
+
+print_all_lambdas()
 
 a1 = 0.94029
 a2 = -1.59914
@@ -21,10 +23,10 @@ fig, ax = plt.subplots()
 alpha = np.linspace(0, 1)
 ax.plot(alpha, lambda_al(alpha))
 
-#alphas_comp = [0.01, 0.04, 0.05, 0.1, 0.3]
-alphas_comp = [0.05]
+alphas_comp = [0.03, 0.05, 0.1, 0.3]
+#alphas_comp = [0.05]
 test = 'bw'
-null = 'shoulder'
+null = 'normal'
 lambda_alphas_comp = []
 for i, alpha in enumerate(alphas_comp):
     lambda_alphas_comp.append(load_lambdas(test, null, alpha))

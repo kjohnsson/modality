@@ -31,7 +31,7 @@ def bootstrap_mpi(fun, N, dtype=np.float_, *args):
     return res
 
 
-def probability_above(fun_resample, gamma, max_samp=None, mpi=False, batch=5):
+def probability_above(fun_resample, gamma, max_samp=None, mpi=False, batch=5, tol=0):
     '''
         Returns True if P(fun_resample()) is significantly above gamma,
         returns False if P(fun_resample()) is significantly below gamma.
@@ -47,8 +47,8 @@ def probability_above(fun_resample, gamma, max_samp=None, mpi=False, batch=5):
             vals_new_samp = bootstrap_mpi(fun_resample, batch)
         vals_new_samp = vals_new_samp[~np.isnan(vals_new_samp)]
         vals = np.hstack([vals, vals_new_samp])
-        upper_bound_pval = binom.cdf(np.sum(vals), len(vals), gamma)
-        lower_bound_pval = 1 - binom.cdf(np.sum(vals)-1, len(vals), gamma)
+        upper_bound_pval = binom.cdf(np.sum(vals), len(vals), gamma+tol)
+        lower_bound_pval = 1 - binom.cdf(np.sum(vals)-1, len(vals), gamma-tol)
         if not mpi or rank == 0:
             print ("gamma = {}".format(gamma)+"\nnp.mean(vals) = {}".format(np.mean(vals)) +
                    "\nlen(vals) = {}".format(len(vals)) +
@@ -65,8 +65,10 @@ def probability_above(fun_resample, gamma, max_samp=None, mpi=False, batch=5):
         if not max_samp is None:
             if len(vals) > max_samp:
                 if not mpi or rank == 0:
-                    print "---"
-                return np.nan
+                    print "---"+"\n"+"max_samp reached"
+                if np.random.rand(1) < 0.5:  # 50% chance to be above or below
+                    return True
+                return False
         batch = len(vals)
 
 
