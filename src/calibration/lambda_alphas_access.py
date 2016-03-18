@@ -37,8 +37,12 @@ def save_lambda(lambda_val, test, null, alpha, upper):
 
     if MPI.COMM_WORLD.Get_rank() == 0:
 
-        with open(lambda_file, 'r') as f:
-            lambda_dict = pickle.load(f)
+        try:
+            with open(lambda_file, 'r') as f:
+                lambda_dict = pickle.load(f)
+        except IOError:
+            print "No file {}, starting from emtpy lambda_dict."
+            lambda_dict = {}
 
         if not test in lambda_dict:
             lambda_dict[test] = {}

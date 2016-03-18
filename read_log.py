@@ -3,7 +3,7 @@ import glob
 
 files = glob.glob('modality_compute_*')
 
-for logfile in files:
+for logfile in ['modality_compute_30353.out']:#files:
     print "logfile = {}".format(logfile)
 
     with open(logfile, 'r') as f:

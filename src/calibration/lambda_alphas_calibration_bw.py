@@ -106,7 +106,7 @@ def h_crit_scale_factor(alpha, null='normal', lower_lambda=0, upper_lambda=2.0, 
             P(P(G_n(lambda)) > 1 - alpha) > alpha
                 => lambda is upper bound on lambda_alpha
         '''
-        return probability_above(lambda: sampling_class(N).probability_of_unimodal_above(lambda_val, 1-alpha), alpha, mpi=True, batch=26, tol=0.005)
+        return probability_above(lambda: sampling_class(N).probability_of_unimodal_above(lambda_val, 1-alpha), alpha, mpi=True, batch=20, tol=0.005)
 
     def save_upper(lambda_bound):
         save_lambda(lambda_bound, 'bw', null, alpha, upper=True)
