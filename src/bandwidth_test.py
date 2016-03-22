@@ -4,6 +4,7 @@ from sklearn.neighbors import KernelDensity
 import matplotlib.pyplot as plt
 
 from .util.ApproxGaussianKDE import ApproxGaussianKDE as KDE
+from .util.bootstrap_MPI import bootstrap_mpi
 from .calibration.lambda_alphas_access import load_lambda
 
 
@@ -11,10 +12,9 @@ def pval_silverman(data, I=(-np.inf, np.inf), N_bootstrap=1000):
     h_crit = critical_bandwidth(data, I)
     var_data = np.var(data)
     KDE_h_crit = KernelDensity(kernel='gaussian', bandwidth=h_crit).fit(data.reshape(-1, 1))
-    smaller_equal_crit_bandwidth = np.zeros((N_bootstrap,), dtype=np.bool_)
-    for n in range(N_bootstrap):  # CHECK: Rescale bootstrap sample towards the mean? Yes.
-        smaller_equal_crit_bandwidth[n] = is_unimodal_kde(
-            h_crit, KDE_h_crit.sample(len(data)).ravel()/np.sqrt(1+h_crit**2/var_data))
+    resamp_fun = lambda: is_unimodal_kde(
+        h_crit, KDE_h_crit.sample(len(data)).ravel()/np.sqrt(1+h_crit**2/var_data))
+    smaller_equal_crit_bandwidth = bootstrap_mpi(resamp_fun, N_bootstrap, dtype=np.bool_)
     return np.mean(~smaller_equal_crit_bandwidth)
 
 
@@ -23,10 +23,10 @@ def reject_null_calibrated_test_bandwidth(data, alpha, null, I=(-np.inf, np.inf)
     h_crit = critical_bandwidth(data)
     var_data = np.var(data)
     KDE_h_crit = KernelDensity(kernel='gaussian', bandwidth=h_crit).fit(data.reshape(-1, 1))
-    smaller_equal_crit_bandwidth = np.zeros((N_bootstrap,), dtype=np.bool_)
-    for n in range(N_bootstrap):  # CHECK: Rescale bootstrap sample towards the mean? Yes.
-        smaller_equal_crit_bandwidth[n] = is_unimodal_kde(
-            h_crit*lambda_alpha, KDE_h_crit.sample(len(data)).ravel()/np.sqrt(1+h_crit**2/var_data))
+    resamp_fun = lambda: is_unimodal_kde(
+        h_crit*lambda_alpha, KDE_h_crit.sample(len(data)).ravel()/np.sqrt(1+h_crit**2/var_data))
+    smaller_equal_crit_bandwidth = bootstrap_mpi(resamp_fun, N_bootstrap, dtype=np.bool_)
+#    print "smaller_equal_crit_bandwidth[:5] = {}".format(smaller_equal_crit_bandwidth[:5])
     return np.mean(~smaller_equal_crit_bandwidth) <= alpha
 
 

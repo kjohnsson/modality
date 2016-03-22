@@ -1,8 +1,16 @@
 import cPickle as pickle
 import numpy as np
+import os
 from mpi4py import MPI
 
-lambda_file = 'src/calibration/lambda_alphas.pkl'
+host = 'ke'
+
+pkg_dirs = {'ke': '/Users/johnsson/Forskning/Code/modality',
+            'au': '/lunarc/nobackup/users/johnsson/Simulations/modality',
+            'ta': '/home/johnsson/Forskning/Code/modality'}
+
+pkg_dir = pkg_dirs[host]
+lambda_file = os.path.join(pkg_dir, 'src/calibration/lambda_alphas.pkl')
 
 
 def load_lambdas(test, null, alpha):

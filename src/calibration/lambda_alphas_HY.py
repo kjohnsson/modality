@@ -23,10 +23,10 @@ fig, ax = plt.subplots()
 alpha = np.linspace(0, 1)
 ax.plot(alpha, lambda_al(alpha))
 
-alphas_comp = [0.03, 0.05, 0.1, 0.3]
-#alphas_comp = [0.05]
+#alphas_comp = [0.03, 0.05, 0.1, 0.3]
+alphas_comp = [0.03, 0.05]
 test = 'bw'
-null = 'normal'
+null = 'shoulder'
 lambda_alphas_comp = []
 for i, alpha in enumerate(alphas_comp):
     lambda_alphas_comp.append(load_lambdas(test, null, alpha))

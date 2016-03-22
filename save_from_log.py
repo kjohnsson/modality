@@ -2,12 +2,12 @@ import re
 
 from src.calibration.lambda_alphas_access import save_lambda
 
+#savelog = '''
+#Saved 0.9375 as upper bound for test bw with null hypothesis fm at alpha = 0.05
+#Saved 0.90625 as lower bound for test bw with null hypothesis fm at alpha = 0.05
 savelog = '''
-Saved 0.9375 as upper bound for test bw with null hypothesis fm at alpha = 0.05
-Saved 0.90625 as lower bound for test bw with null hypothesis fm at alpha = 0.05
-
-Saved 1.03125 as upper bound for test bw with null hypothesis shoulder at alpha = 0.1
-Saved 1.0 as lower bound for test bw with null hypothesis shoulder at alpha = 0.1
+Saved 1.03125 as lower bound for test bw with null hypothesis shoulder at alpha = 0.05
+Saved 1.03125 as lower bound for test bw with null hypothesis shoulder at alpha = 0.03
 '''
 
 loglines = savelog.split('\n')
