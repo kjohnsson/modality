@@ -41,7 +41,7 @@ def save_res(vals, test, param):
 to_test = ['silverman', 'bandwidth_cal_normal', 'bandwidth_cal_shoulder']
 ntest = 100
 
-for mtol in [-1, 0, 0.001, 0.003, 0.0001]:
+for mtol in [0.001, 0.0003, 0.0001, 0, -1]:
     for N in [1000, 2000, 5000, 10000]:
 
         if rank == 0:
