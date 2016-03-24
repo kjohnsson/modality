@@ -41,7 +41,7 @@ def print_all_lambdas():
     print "All computed lambda_alpha: {}".format(lambda_dict)
 
 
-def save_lambda(lambda_val, test, null, alpha, upper):
+def save_lambda(lambda_val, test, null, alpha, upper=None):
 
     if MPI.COMM_WORLD.Get_rank() == 0:
 
@@ -58,10 +58,16 @@ def save_lambda(lambda_val, test, null, alpha, upper):
         if not null in lambda_dict[test]:
             lambda_dict[test][null] = {}
 
-        if not alpha in lambda_dict[test][null]:
-            lambda_dict[test][null][alpha] = np.nan*np.ones((2,))
+        if test == 'bw':
+            if not alpha in lambda_dict[test][null]:
+                lambda_dict[test][null][alpha] = np.nan*np.ones((2,))
 
-        lambda_dict[test][null][alpha][np.int(upper)] = lambda_val
+            lambda_dict[test][null][alpha][np.int(upper)] = lambda_val
+        elif test == 'dip':
+            lambda_dict[test][null][alpha] = lambda_val
+        else:
+            raise ValueError('Unknown test')
+
 
         with open(lambda_file, 'w') as f:
             pickle.dump(lambda_dict, f, -1)

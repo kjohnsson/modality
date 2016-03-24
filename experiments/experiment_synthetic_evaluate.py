@@ -30,5 +30,5 @@ with open(summary_file, 'w') as sumf:
                 if alpha != alpha_:
                     continue
                 frac_reject = np.mean(res[param])
-            sumf.write('{}, {}, "{}", {}, {}, {}\n'.format(test, mtol, shoulder_ratio, N, ntest, frac_reject))
+            sumf.write('{}, {}, "{}/{}", {}, {}, {}\n'.format(test, mtol, shoulder_ratio[0], shoulder_ratio[1], N, ntest, frac_reject))
 
