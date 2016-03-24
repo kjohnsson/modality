@@ -31,6 +31,13 @@ def bootstrap_mpi(fun, N, dtype=np.float_, *args):
     return res
 
 
+def bootstrap_array(fun, N, l, dtype=np.float_, *args):
+    res = np.zeros((N, l), dtype=dtype)
+    for i in range(res.shape[0]):
+        res[i, :] = fun(*args)
+    return res
+
+
 def probability_above(fun_resample, gamma, max_samp=None, mpi=False, batch=5, tol=0):
     '''
         Returns True if P(fun_resample()) is significantly above gamma,

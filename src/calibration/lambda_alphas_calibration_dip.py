@@ -3,8 +3,8 @@ from collections import Counter
 from scipy.stats import binom
 import matplotlib.pyplot as plt
 
-from .diptest import cum_distr, dip_and_closest_unimodal_from_cdf, dip_from_cdf
-from .util.bootstrap_MPI import bootstrap_mpi, bootstrap
+from ..diptest import cum_distr, dip_and_closest_unimodal_from_cdf, dip_from_cdf
+from ..util.bootstrap_MPI import bootstrap_mpi, bootstrap, bootstrap_array
 
 
 class XSampleDip(object):
@@ -41,31 +41,29 @@ class XSampleDip(object):
             i += cnt
         return data
 
-    def lowest_lambda_rejecting(self, alpha):
-        B = 50
+    def lowest_lambdas_rejecting(self, alphas, B=50):
         dips = bootstrap_mpi(self.dip_resampled, B)
-        i = np.floor(alpha*B)
-        dip_thr = -np.partition(-dips, i)[i]
-        lambd = dip_thr/self.dip
+        i_s = np.floor(alphas*B)
+        dip_thrs = -np.sort(-dips)[i_s.astype(np.int)]
+        lambdas = dip_thrs/self.dip
         #print "np.mean(dips/self.dip <= lambd) = {}".format(np.mean(dips/self.dip <= lambd))
-        return lambd
+        return lambdas
 
     def plot_unimodal(self):
         plt.plot(*self.unimod)
 
 
-def dip_scale_factor(alpha):
-    B = 60
-    N = 1000
-    i = np.round(B*alpha)-1
-    lowest_lambdas_rejecting = bootstrap(lambda: XSampleDip(N).lowest_lambda_rejecting(alpha), B)
-    lambd = np.partition(lowest_lambdas_rejecting, i)[i]
-    print "np.mean(lowest_lambdas_rejecting <= lambd) = {}".format(np.mean(lowest_lambdas_rejecting <= lambd))
-    return lambd
+def dip_scale_factor(alphas, B=50, N=10000):
+    i_s = np.round(B*alphas)-1
+    lowest_lambdas_rejects = bootstrap_array(lambda: XSampleDip(N).lowest_lambdas_rejecting(alphas), B, len(alphas))
+    lambdas = -np.sort(-lowest_lambdas_rejects, axis=0)[i_s.astype(np.int), np.arange(len(alphas))]
+    #print "np.mean(lowest_lambdas_rejecting <= lambd) = {}".format(np.mean(lowest_lambdas_rejecting <= lambd))
+    return lambdas
 
 
 if __name__ == '__main__':
     #seed = np.random.randint(1000)
+    import time
     seed = 411
     print "seed = {}".format(seed)
     np.random.seed(seed)
@@ -83,4 +81,11 @@ if __name__ == '__main__':
                 print "xdip.dip_resampled() = {}".format(xdip.dip_resampled())
         if 0:
             print "xdip.lowest_lambda_rejecting(0.05) = {}".format(xdip.lowest_lambda_rejecting(0.05))
-    print "dip_scale_factor(0.05) = {}".format(dip_scale_factor(0.05))
+    #print "dip_scale_factor(0.05) = {}".format(dip_scale_factor(0.05))
+    alphas = np.arange(0.01, 0.99, 0.01)
+    t0 = time.time()
+    lambda_alphas = dip_scale_factor(alphas)
+    t1 = time.time()
+    print "Time: {}".format(t1-t0)
+    plt.plot(alphas, lambda_alphas)
+    plt.show()

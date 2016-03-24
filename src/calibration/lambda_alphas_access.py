@@ -3,7 +3,7 @@ import numpy as np
 import os
 from mpi4py import MPI
 
-host = 'ke'
+host = 'ta'
 
 pkg_dirs = {'ke': '/Users/johnsson/Forskning/Code/modality',
             'au': '/lunarc/nobackup/users/johnsson/Simulations/modality',

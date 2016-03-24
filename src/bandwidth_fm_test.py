@@ -197,21 +197,21 @@ def is_unimodal_kde(h, data, lamtol, mtol, I=(-np.inf, np.inf), debug=False):
                     axs[1].plot([x_left, x_right], [lambd/kde._norm_factor]*2)
 
 
-def find_reference_distr(mtol):
-    return bisection_search_reference_distr(0, 4, mtol)
+def find_reference_distr(mtol, shoulder_ratio):
+    return bisection_search_reference_distr(0, 4, mtol, shoulder_ratio)
 
 
-def bisection_search_reference_distr(amin, amax, mtol, atol=1e-6):
+def bisection_search_reference_distr(amin, amax, mtol, shoulder_ratio, atol=1e-6):
 
     anew = (amin + amax)/2.0
     if amax - amin < atol:
         return anew
 
-    data = np.array([0, 0, anew])
+    data = np.repeat([anew, 0], shoulder_ratio)
     if is_unimodal_kde(1, data, 0, mtol):
-        return bisection_search_reference_distr(anew, amax, mtol, atol)
+        return bisection_search_reference_distr(anew, amax, mtol, shoulder_ratio, atol)
 
-    return bisection_search_reference_distr(amin, anew, mtol, atol)
+    return bisection_search_reference_distr(amin, anew, mtol, shoulder_ratio, atol)
 
 
 def merge_into(z_new, z):
@@ -243,7 +243,7 @@ if __name__ == '__main__':
         print "Pval computation time: {}".format(t2-t1)
         print "Pval computation time (mpi) = {}".format(t3-t2)
 
-    if 1:
+    if 0:
         import time
         N = 1000
         data = np.hstack([np.random.randn(N/2), np.random.randn(N/2)])
@@ -272,6 +272,16 @@ if __name__ == '__main__':
         lamtol = 0.01
         mtol = 0.01
         print "is_unimodal_kde(h, data, lamtol, mtol) = {}".format(is_unimodal_kde(h, data, lamtol, mtol, debug=False))
+        plt.show()
+
+    if 1:
+        mtol = 0
+        x = np.linspace(-2, 5, 200)
+        for shoulder_ratio in [(1, 3), (1, 5), (1, 7), (1, 7)]:
+            a = find_reference_distr(mtol, shoulder_ratio)
+            w2, w1 = shoulder_ratio
+            y = w1*np.exp(-x**2/2) + w2*np.exp(-(x-a)**2/2)
+            plt.plot(x, y)
         plt.show()
 
 
