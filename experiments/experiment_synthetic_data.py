@@ -9,7 +9,7 @@ from scipy.stats import binom
 
 sys.path.append('/home/johnsson/Forskning/Code/modality')
 from src.bandwidth_fm_test import find_reference_distr
-from src.bandwidth_test import pval_silverman, reject_null_calibrated_test_bandwidth
+from src.bandwidth_test import pval_silverman, reject_null_calibrated_test_bandwidth, pval_calibrated_bandwidth
 
 host = 'au'
 
@@ -79,22 +79,26 @@ for shoulder_ratio in [(1, 3), (1, 5), (1, 7), (1, 17)]:
 
         if 'bandwidth_cal_normal' in to_test:
             t0 = time.time()
-            alpha = 0.05
-            rejections = np.zeros((ntest,), dtype=np.bool)
+            alpha_cal = 0.05
+            #rejections = np.zeros((ntest,), dtype=np.bool)
+            pvals = np.zeros((ntest,), dtype=np.float)
             for i, data in enumerate(datas):
-                rejections[i] = reject_null_calibrated_test_bandwidth(data, alpha, 'normal', I)
-            save_res(rejections, 'bandwidth_cal_normal', (ntest, mtol, shoulder_ratio, N, alpha))
+                pvals[i] = pval_calibrated_bandwidth(data, alpha_cal, 'normal', I)
+                #rejections[i] = reject_null_calibrated_test_bandwidth(data, alpha, 'normal', I)
+            save_res(pvals, 'bandwidth_cal_normal', (ntest, mtol, shoulder_ratio, N, alpha_cal))
             t1 = time.time()
             if rank == 0:
                 print "Calibrated normal time ({}, {}, {}, {}): {}".format(ntest, mtol, shoulder_ratio, N, t1-t0)
 
         if 'bandwidth_cal_shoulder' in to_test:
             t0 = time.time()
-            alpha = 0.05
-            rejections = np.zeros((ntest,), dtype=np.bool)
+            alpha_cal = 0.05
+            #rejections = np.zeros((ntest,), dtype=np.bool)
+            pvals = np.zeros((ntest,), dtype=np.float)
             for i, data in enumerate(datas):
-                rejections[i] = reject_null_calibrated_test_bandwidth(data, 0.05, 'shoulder', I)
-            save_res(rejections, 'bandwidth_cal_shoulder', (ntest, mtol, shoulder_ratio, N, alpha))
+                pvals[i] = pval_calibrated_bandwidth(data, alpha_cal, 'normal', I)
+                #rejections[i] = reject_null_calibrated_test_bandwidth(data, 0.05, 'shoulder', I)
+            save_res(pvals, 'bandwidth_cal_shoulder', (ntest, mtol, shoulder_ratio, N, alpha_cal))
             t1 = time.time()
             if rank == 0:
                 print "Calibrated shoulder time ({}, {}, {}, {}): {}".format(ntest, mtol, shoulder_ratio, N, t1-t0)
