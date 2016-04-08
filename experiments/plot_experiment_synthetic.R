@@ -1,7 +1,12 @@
 library(lattice)
 library(RColorBrewer)
 
-data <- read.csv('/home/johnsson/Forskning/Experiments/modality/synthetic/summary_0.05.csv')
+if (TRUE) {
+  resdir <- '/Users/johnsson/Forskning/Experiments/modality/synthetic/'
+} else {
+  resdir <- '/home/johnsson/Forskning/Experiments/modality/synthetic/'
+}
+data <- read.csv(paste0(resdir, 'summary_0.05.csv'))
 data$N = as.factor(data$N)
 
 myColours <- brewer.pal(6,"Blues")

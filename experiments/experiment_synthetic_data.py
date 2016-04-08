@@ -10,6 +10,7 @@ from scipy.stats import binom
 sys.path.append('/home/johnsson/Forskning/Code/modality')
 from src.bandwidth_fm_test import find_reference_distr
 from src.bandwidth_test import pval_silverman, reject_null_calibrated_test_bandwidth, pval_calibrated_bandwidth
+from src.util.GaussianMixture1d import GaussianMixture1d as GM
 
 host = 'au'
 
@@ -42,9 +43,11 @@ def save_res(vals, test, param):
 to_test = ['silverman', 'bandwidth_cal_normal', 'bandwidth_cal_shoulder']
 ntest = 100
 mtol = 0
+shoulder_ratio = (1, 16)
 
 #for mtol in [0.001, 0.003, 0.0001, 0, -1]:
-for shoulder_ratio in [(1, 3), (1, 5), (1, 7), (1, 17)]:
+#for shoulder_ratio in [(1, 3), (1, 5), (1, 7), (1, 17)]:
+for shoulder_variance in [0.1**2, 0.25**2, 0.5**2, 1]:
     for N in [1000, 2000, 5000, 10000]:
 
         if rank == 0:
@@ -52,10 +55,19 @@ for shoulder_ratio in [(1, 3), (1, 5), (1, 7), (1, 17)]:
             if mtol == -1:
                 datas = [np.random.randn(N) for i in range(ntest)]
             else:
-                a = find_reference_distr(mtol, shoulder_ratio)
-                print "a = {}".format(a)
-                N_shoulders = [binom.rvs(N, shoulder_ratio[0]*1./shoulder_ratio[1]) for i in range(ntest)]
-                datas = [np.hstack([np.random.randn(N-N_shoulder), np.random.randn(N_shoulder)+a]) for i, N_shoulder in zip(range(ntest), N_shoulders)]
+                if shoulder_variance == 1:
+                    a = find_reference_distr(mtol, shoulder_ratio)
+                    print "a = {}".format(a)
+                    N_shoulders = [binom.rvs(N, shoulder_ratio[0]*1./sum(shoulder_ratio)) for i in range(ntest)]
+                    datas = [np.hstack([np.random.randn(N-N_shoulder), np.random.randn(N_shoulder)+a]) for i, N_shoulder in zip(range(ntest), N_shoulders)]
+                else:
+                    a = find_reference_distr(0, shoulder_ratio, shoulder_variance, min=0.2, max=4)
+                    print "a = {}".format(a)
+                    weights = np.array(shoulder_ratio, dtype=np.float)
+                    weights /= np.sum(weights)
+                    gm = GM(np.array([0, a]), np.array([1, shoulder_variance]), weights)
+                    datas = [gm.sample(N) for i in range(ntest)]
+
             np.random.seed()
             print "datas[0][:3] = {}".format(datas[0][:3])
         else:

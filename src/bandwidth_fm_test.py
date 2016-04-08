@@ -1,11 +1,13 @@
 import numpy as np
 from scipy.signal import argrelextrema
+from scipy.optimize import minimize
 from sklearn.neighbors import KernelDensity
 import matplotlib.pyplot as plt
 
 from .util.ApproxGaussianKDE import ApproxGaussianKDE as KDE
 from .util.bootstrap_MPI import bootstrap_mpi as bootstrap
 from .util import MC_error_check
+from .util.GaussianMixture1d import GaussianMixture1d as GM
 
 
 def testfun(x):
@@ -64,27 +66,57 @@ def is_resampled_unimodal_kde(kde, resampling_scale_factor, n, h, lamtol, mtol, 
     return is_unimodal_kde(h, kde.sample(n).ravel()*resampling_scale_factor, lamtol, mtol, I)
 
 
-@profile
-def is_unimodal_kde(h, data, lamtol, mtol, I=(-np.inf, np.inf), debug=False):
-    xtol = h*0.1  # TODO: Compute error given xtol.
+def is_unimodal_kde(h, data, lamtol, mtol, I=None, debug=False):
+    return len(mode_sizes_kde(h, data, lamtol, mtol, I, debug=debug)) == 0
+
+
+def is_unimodal_from_kde(kde, lamtol, mtol, I, xtol, debug=False):
+    return len(mode_sizes_from_kde(kde, lamtol, mtol, I, xtol, debug)) == 0
+
+
+def mode_sizes_kde(h, data, lamtol, mtol, I=None, xtol=None, debug=False):
+    if xtol is None:
+        xtol = h*0.05  # TODO: Compute error given xtol.
     kde = KDE(data, h)
+    if I is None:
+        I = np.min(data), np.max(data)
+    return mode_sizes_from_kde(kde, lamtol, mtol, I, xtol, debug)
+
+
+@profile
+def mode_sizes_from_kde(kde, lamtol, mtol, I, xtol, debug=False):
+    '''
+        kde does not necessarily have to be a kernel density estimator.
+        It is required that it has the attributes:
+            - evaluate_prop: A function that returns the density
+              function evaluated at the input vector (or something
+              proportional to this).
+            - _norm_factor: A normalization factor such that
+              kde.evaluate_prop(x)/kde._norm_factor gives the true
+              density.
+            - distr: A function evaluating the distribution function at
+              the input element.
+    '''
     lamtol_prop = lamtol*kde._norm_factor  # scaled with same proportionality constant as kde
     #print "lamtol_prop = {}".format(lamtol_prop)
-    x_new = np.linspace(max(np.min(data), I[0]), min(np.max(data), I[1]), 40)
+    x_new = np.linspace(I[0], I[1], 40)
     x = np.zeros(0,)
     y = np.zeros(0,)
     zero = np.zeros(1,)
     while True:
         if len(x) > 0:
             if x[1] - x[0] < xtol:
-                return True
+                return np.zeros((0,))
         y_new = kde.evaluate_prop(x_new)
         x = merge_into(x_new, x)
         y = merge_into(y_new, y)
         if debug:
             fig, axs = plt.subplots(1, 2)
+            x_plot = np.linspace(x[0], x[-1], 1000)
+            y_plot = kde.evaluate_prop(x_plot)
             for ax in axs:
-                ax.plot(x, y/kde._norm_factor)
+                ax.plot(x_plot, y_plot/kde._norm_factor)
+                #ax.plot(x, y/kde._norm_factor)
                 ax.scatter(x, y/kde._norm_factor, marker='+')
                 ax.scatter(x_new, y_new/kde._norm_factor, marker='+', color='red')
         ind_mode = argrelextrema(np.hstack([zero, y, zero]), np.greater)[0]-1
@@ -124,6 +156,7 @@ def is_unimodal_kde(h, data, lamtol, mtol, I=(-np.inf, np.inf), debug=False):
 
             # Computing size of individual modes.
             big_enough = np.zeros((nbr_modes,), dtype='bool')
+            mode_sizes = np.zeros((nbr_modes,))
             for i in np.arange(nbr_modes)[~low_modes]:
                 li = lambda_ind[i]
                 x_left = x[left_boundaries[i, li]]
@@ -134,10 +167,13 @@ def is_unimodal_kde(h, data, lamtol, mtol, I=(-np.inf, np.inf), debug=False):
                     print "mode_size {} = {}".format(i, mode_size)
                 if mode_size > mtol:
                     big_enough[i] = True
+                    mode_sizes[i] = mode_size
                     if np.sum(big_enough) > 1:
-                        return False
+                        return mode_sizes[mode_sizes > 0]
 
             # Merging modes
+            if debug:
+                print "Merging modes"
             supermode_ind_start = np.arange(nbr_modes)
             supermode_ind_end = np.arange(nbr_modes)+1
             #lambda_ind = np.arange(nbr_modes)  # which lambdas is used for each supermode
@@ -176,6 +212,7 @@ def is_unimodal_kde(h, data, lamtol, mtol, I=(-np.inf, np.inf), debug=False):
                         print "li = {}".format(li)
                     if supermode_size > mtol:
                         big_enough[i] = True
+                        mode_sizes[i] = supermode_size
                         for j in range(i):
                             if big_enough[j] and supermode_ind_end[j] > start:
                                 big_enough[j] = False
@@ -183,7 +220,8 @@ def is_unimodal_kde(h, data, lamtol, mtol, I=(-np.inf, np.inf), debug=False):
                             if debug:
                                 print "(start, end) = {}".format((start, end))
                                 axs[1].plot([x_left, x_right], [lambd/kde._norm_factor]*2)
-                            return False
+                            return mode_sizes[mode_sizes > 0]
+
                 supermode_ind_start[i] = start
                 supermode_ind_end[i] = end
                 li = start if lambdas[start] > lambdas[end] else end
@@ -197,21 +235,54 @@ def is_unimodal_kde(h, data, lamtol, mtol, I=(-np.inf, np.inf), debug=False):
                     axs[1].plot([x_left, x_right], [lambd/kde._norm_factor]*2)
 
 
-def find_reference_distr(mtol, shoulder_ratio):
-    return bisection_search_reference_distr(0, 4, mtol, shoulder_ratio)
+def find_reference_distr(mtol, shoulder_ratio, shoulder_variance=1, min=0, max=4):
+    if shoulder_variance == 1:
+        return bisection_search_reference_distr(min, max, mtol, shoulder_ratio, shoulder_variance)
+
+    m_err_tol = 1e-7
+    covs = np.array([1, shoulder_variance])
+    weights = np.array(shoulder_ratio, dtype=np.float)
+    weights /= np.sum(weights)
+
+    def second_mode_size(a):
+        mode_sizes = mode_sizes_from_kde(GM(np.array([0, a]), covs, weights),
+                                         lamtol=0, mtol=mtol+m_err_tol, I=[-1, a+1], xtol=a/10000)
+        if len(mode_sizes) == 0:
+            return 0
+        return mode_sizes[1]
+    minval = 1
+    i = 0
+    max_init = 50
+    while minval > mtol+m_err_tol:
+        x0 = min+(max-min)*np.random.rand(1)
+        res_minimizer = minimize(second_mode_size, x0=x0, bounds=[(min, max)], tol=1e-10)
+        minval = res_minimizer.fun
+        #print "(minval, res_minimizer.x, x0) = {}".format((minval, res_minimizer.x, x0))
+        i += 1
+        if i > max_init:
+            raise ValueError('Unimodal function not found')
+    min = res_minimizer.x
+    return bisection_search_reference_distr(min, max, mtol, shoulder_ratio, shoulder_variance)
 
 
-def bisection_search_reference_distr(amin, amax, mtol, shoulder_ratio, atol=1e-6):
-
+def bisection_search_reference_distr(amin, amax, mtol, shoulder_ratio, shoulder_variance, atol=1e-6):
     anew = (amin + amax)/2.0
     if amax - amin < atol:
-        return anew
+        return amin  # ensure that resulting distribution is unimodal
 
-    data = np.repeat([anew, 0], shoulder_ratio)
-    if is_unimodal_kde(1, data, 0, mtol):
-        return bisection_search_reference_distr(anew, amax, mtol, shoulder_ratio, atol)
-
-    return bisection_search_reference_distr(amin, anew, mtol, shoulder_ratio, atol)
+    if shoulder_variance == 1:
+        data = np.repeat([anew, 0], shoulder_ratio)
+        passed = is_unimodal_kde(1, data, 0, mtol)
+    else:
+        m_err_tol = 1e-7
+        covs = np.array([1, shoulder_variance])
+        weights = np.array(shoulder_ratio, dtype=np.float)
+        weights /= np.sum(weights)
+        passed = is_unimodal_from_kde(GM(np.array([0, anew]), covs, weights),
+                                      lamtol=0, mtol=mtol+m_err_tol, I=[-1, anew+1], xtol=anew/10000)
+    if passed:
+        return bisection_search_reference_distr(anew, amax, mtol, shoulder_ratio, shoulder_variance, atol)
+    return bisection_search_reference_distr(amin, anew, mtol, shoulder_ratio, shoulder_variance, atol)
 
 
 def merge_into(z_new, z):

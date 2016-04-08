@@ -41,7 +41,7 @@ class XSampleDip(object):
             i += cnt
         return data
 
-    def lowest_lambdas_rejecting(self, alphas, B=50):
+    def lowest_lambdas_rejecting(self, alphas, B=100):
         dips = bootstrap_mpi(self.dip_resampled, B)
         i_s = np.floor(alphas*B)
         dip_thrs = -np.sort(-dips)[i_s.astype(np.int)]
@@ -53,7 +53,7 @@ class XSampleDip(object):
         plt.plot(*self.unimod)
 
 
-def dip_scale_factor(alphas, B=50, N=10000):
+def dip_scale_factor(alphas, B=100, N=10000):
     i_s = np.round(B*alphas)-1
     lowest_lambdas_rejects = bootstrap_array(lambda: XSampleDip(N).lowest_lambdas_rejecting(alphas), B, len(alphas))
     lambdas = -np.sort(-lowest_lambdas_rejects, axis=0)[i_s.astype(np.int), np.arange(len(alphas))]
