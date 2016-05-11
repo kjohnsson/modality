@@ -100,9 +100,19 @@ def dip_and_closest_unimodal_from_cdf(xF, yF, plotting=False, verbose=False, eps
         iG = np.arange(L, U+1)[iGG]
         iH = np.arange(L, U+1)[iHH]
 
+        # Interpolate. First and last point are in both and does not need
+        # interpolation. Might cause trouble if included due to possiblity
+        # of infinity slope at beginning or end of interval.
+        if iG[0] != iH[0] or iG[-1] != iH[-1]:
+            raise ValueError('Convex minorant and concave majorant should start and end at same points.')
+        hipl = np.interp(xF[iG[1:-1]], xF[iH], yF[iH])
+        gipl = np.interp(xF[iH[1:-1]], xF[iG], yF[iG])
+        hipl = np.hstack([yF[iH[0]], hipl, yF[iH[-1]]])
+        gipl = np.hstack([yF[iG[0]], gipl, yF[iG[-1]]])
+        #hipl = lin_interpol_sorted(xF[iG], xF[iH], yF[iH])
+        #gipl = lin_interpol_sorted(xF[iH], xF[iG], yF[iG])
+
         # Find largest difference between GCM and LCM.
-        hipl = lin_interpol_sorted(xF[iG], xF[iH], yF[iH])
-        gipl = lin_interpol_sorted(xF[iH], xF[iG], yF[iG])
         gdiff = hipl - yF[iG]
         hdiff = yF[iH] - gipl
         imaxdiffg = np.argmax(gdiff)
@@ -145,17 +155,17 @@ def dip_and_closest_unimodal_from_cdf(xF, yF, plotting=False, verbose=False, eps
             bax.axvline(xF[U0], ymin, ymax, color='red')
             bax.set_xlim(xF[L]-.1*(xF[U]-xF[L]), xF[U]+.1*(xF[U]-xF[L]))
 
+        # Compute new lower bound for dip*2
+        # i.e. largest difference outside modal interval
+        gipl = np.interp(xF[L:(L0+1)], xF[iG], yF[iG])
+        D = max(D, np.amax(yF[L:(L0+1)] - gipl))
+        hipl = np.interp(xF[U0:(U+1)], xF[iH], yF[iH])
+        D = max(D, np.amax(hipl - yF[U0:(U+1)]))
+
         if xF[U0]-xF[L0] < eps:
             if verbose:
                 print "Modal interval zero length"
             break
-
-        # Compute new lower bound for dip*2
-        # i.e. largest difference outside modal interval
-        gipl = lin_interpol_sorted(xF[L:(L0+1)], xF[iG], yF[iG])
-        D = max(D, np.amax(yF[L:(L0+1)] - gipl))
-        hipl = lin_interpol_sorted(xF[U0:(U+1)], xF[iH], yF[iH])
-        D = max(D, np.amax(hipl - yF[U0:(U+1)]))
 
         if plotting:
             mxpt = np.argmax(yF[L:(L0+1)] - gipl)
@@ -194,7 +204,7 @@ def dip_and_closest_unimodal_from_cdf(xF, yF, plotting=False, verbose=False, eps
     iM_concave = iM[iMM_concave]
     #bax.plot(xF[iM], yM_lower, color='orange')
     #bax.plot(xF[iM_concave], yM_lower[iMM_concave], color='red')
-    lcm_ipl = lin_interpol_sorted(xF[iM], xF[iM_concave], yM_lower[iMM_concave])
+    lcm_ipl = np.interp(xF[iM], xF[iM_concave], yM_lower[iMM_concave])
     try:
         mode = iM[np.nonzero(lcm_ipl > yF[iM]+D/2)[0][-1]]
         #bax.axvline(xF[mode], color='green', linestyle='dashed')
@@ -229,7 +239,7 @@ def dip_and_closest_unimodal_from_cdf(xF, yF, plotting=False, verbose=False, eps
     iM_concave = iM[iMM_concave]
     #bax.plot(xF[iM], yM_lower, color='orange')
     #bax.plot(xF[iM_concave], yM_lower[iMM_concave], color='red')
-    lcm_ipl = lin_interpol_sorted(xF[iM], xF[iM_concave], yM_lower[iMM_concave])
+    lcm_ipl = np.interp(xF[iM], xF[iM_concave], yM_lower[iMM_concave])
     try:
         mode = iM[np.nonzero(lcm_ipl > yF[iM]+D/2)[0][-1]]
         #bax.axvline(xF[mode], color='green', linestyle='dashed')
