@@ -26,14 +26,8 @@ def sample_from_unimod(unimod, N):
     xU, yU = unimod
     #print "zip(xU, yU) = {}".format(zip(xU, yU))
     dxU = np.diff(xU)
-    xU = np.hstack([xU[0], xU[1:][dxU > 0]])
-    yU = np.hstack([yU[0], yU[1:][dxU > 0]])
-    dxU = dxU[dxU > 0]
-    #print "zip(xU, yU) = {}".format(zip(xU, yU))
-    kU = np.diff(yU)/np.diff(xU)
-    cum_probU = np.cumsum(kU*np.diff(xU))
     t = np.random.rand(N)
-    bins = np.searchsorted(cum_probU, t)
+    bins = np.searchsorted(yU, t)-1
     bin_cnt = Counter(bins).most_common()
     data = np.zeros((N,))
     i = 0
