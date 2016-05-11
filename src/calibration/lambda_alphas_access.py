@@ -3,7 +3,7 @@ import numpy as np
 import os
 from mpi4py import MPI
 
-host = 'ta'
+host = 'ke'
 
 pkg_dirs = {'ke': '/Users/johnsson/Forskning/Code/modality',
             'au': '/lunarc/nobackup/users/johnsson/Simulations/modality',
@@ -11,6 +11,33 @@ pkg_dirs = {'ke': '/Users/johnsson/Forskning/Code/modality',
 
 pkg_dir = pkg_dirs[host]
 lambda_file = os.path.join(pkg_dir, 'src/calibration/lambda_alphas.pkl')
+lambda_bw_csv_file = os.path.join(pkg_dir, 'src/calibration/lambda_alphas_bw.csv')
+lambda_dip_csv_file = os.path.join(pkg_dir, 'src/calibration/lambda_alphas_dip.csv')
+
+
+def lambda_dict_to_csv():
+    with open(lambda_file, 'r') as f:
+        lambda_dict = pickle.load(f)
+
+    with open(lambda_bw_csv_file, 'w') as f:
+        f.write('Test, Null hypothesis, alpha, Lower bound, Upper bound\n')
+
+        for test in lambda_dict:
+            for null in lambda_dict[test]:
+                for alpha in lambda_dict[test][null]:
+                    lambdas = lambda_dict[test][null][alpha]
+                    if not test == 'dip':
+                        f.write('{}, {}, {}, {}, {}\n'.format(test, null, alpha, lambdas[0], lambdas[1]))
+
+    with open(lambda_dip_csv_file, 'w') as f:
+        f.write('Test, Null hypothesis, alpha, Lambda\n')
+
+        for test in lambda_dict:
+            for null in lambda_dict[test]:
+                for alpha in lambda_dict[test][null]:
+                    lambda_ = lambda_dict[test][null][alpha]
+                    if test == 'dip':
+                        f.write('{}, {}, {}, {}\n'.format(test, null, alpha, lambda_))
 
 
 def load_lambdas(test, null, alpha):
@@ -58,7 +85,7 @@ def save_lambda(lambda_val, test, null, alpha, upper=None):
         if not null in lambda_dict[test]:
             lambda_dict[test][null] = {}
 
-        if test == 'bw':
+        if test == 'bw' or test == 'dip_ex' or test == 'fm':
             if not alpha in lambda_dict[test][null]:
                 lambda_dict[test][null][alpha] = np.nan*np.ones((2,))
 
@@ -66,17 +93,18 @@ def save_lambda(lambda_val, test, null, alpha, upper=None):
         elif test == 'dip':
             lambda_dict[test][null][alpha] = lambda_val
         else:
-            raise ValueError('Unknown test')
-
+            raise ValueError('Unknown test: {}'.format(test))
 
         with open(lambda_file, 'w') as f:
             pickle.dump(lambda_dict, f, -1)
+
+        lambda_dict_to_csv()
 
         print "Saved {} as {} bound for test {} with null hypothesis {} at alpha = {}".format(
             lambda_val, 'upper' if upper else 'lower', test, null, alpha)
 
 if __name__ == '__main__':
-    
+
     if 0:
         with open(lambda_file, 'w') as f:
             pickle.dump({}, f, -1)
@@ -91,6 +119,9 @@ if __name__ == '__main__':
         alpha = 0.1
         llam, ulam = 1.25, 1.5
         save_lambda(ulam, 'bw', 'normal', alpha, True)
-        save_lambda(llam, 'bw', 'normal', alpha, False)       
+        save_lambda(llam, 'bw', 'normal', alpha, False)
 
         print_all_lambdas()
+
+    if 1:
+        lambda_dict_to_csv()

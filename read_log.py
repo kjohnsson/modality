@@ -1,18 +1,18 @@
 import re
 import glob
 
-files = glob.glob('modality_compute_*')
+files = glob.glob('modality_dip_*')
 
-for logfile in ['modality_compute_31093.out']:#files:
+for logfile in files: #['modality_compute_31093.out']:#files:
     print "logfile = {}".format(logfile)
 
     with open(logfile, 'r') as f:
         lines = f.readlines()
 
     for line in lines:
-        if re.match('^Saved ([0-9.]+) as (upper|lower) bound for test ([a-z]+) with null hypothesis ([a-z]+) at alpha = ([0-9.]+)$', line) is not None:
+        if re.match('^Saved ([0-9.]+) as (upper|lower) bound for test ([a-z_]+) with null hypothesis ([a-z_0-9.]+) at alpha = ([0-9.]+)$', line) is not None:
             test, null, alpha = \
-                re.sub('^Saved ([0-9.]+) as (upper|lower) bound for test ([a-z]+) with null hypothesis ([a-z]+) at alpha = ([0-9.]+)$',
+                re.sub('^Saved ([0-9.]+) as (upper|lower) bound for test ([a-z_]+) with null hypothesis ([a-z_0-9.]+) at alpha = ([0-9.]+)$',
                        '\\3 \\4 \\5', line).split()
             break
 
@@ -29,9 +29,9 @@ for logfile in ['modality_compute_31093.out']:#files:
             if '---' in lines[i]:
                 ntests += 1
             if "Saved" in lines[i]:
-                bound_type = re.sub('^Saved ([0-9.]+) as (upper|lower) bound for test ([a-z]+) with null hypothesis ([a-z]+) at alpha = ([0-9.]+)$', '\\2', lines[i])
+                bound_type = re.sub('^Saved ([0-9.]+) as (upper|lower) bound for test ([a-z_]+) with null hypothesis ([a-z]+) at alpha = ([0-9.]+)$', '\\2', lines[i])
                 bound_type = bound_type.replace('\n', '')
-                val = re.sub('^Saved ([0-9.]+) as (upper|lower) bound for test ([a-z]+) with null hypothesis ([a-z]+) at alpha = ([0-9.]+)$', '\\1', lines[i])
+                val = re.sub('^Saved ([0-9.]+) as (upper|lower) bound for test ([a-z_]+) with null hypothesis ([a-z_0-9.]+) at alpha = ([0-9.]+)$', '\\1', lines[i])
                 val = float(val)
                 bound_found = True
                 break
@@ -39,9 +39,9 @@ for logfile in ['modality_compute_31093.out']:#files:
 
         while i > 0:
             if 'gamma = {}'.format(alpha) in lines[i]:
-                mean_val = re.sub('np.mean\(vals\) = ([0-9]+)', '\\1', lines[i+1])
+                mean_val = re.sub('^([0-9]+: ?)?np.mean\(vals\) = ([0-9]+)', '\\2', lines[i+1])
                 mean_val = float(mean_val)
-                nbr_tests = re.sub('len\(vals\) = ([0-9]+)', '\\1', lines[i+2])
+                nbr_tests = re.sub('^([0-9]+: ?)?len\(vals\) = ([0-9]+)', '\\2', lines[i+2])
                 nbr_tests = int(nbr_tests)
                 break
             i -= 1
@@ -50,7 +50,7 @@ for logfile in ['modality_compute_31093.out']:#files:
             if 'max_samp' in lines[i]:
                 max_samp_reached += 1
             if "Testing" in lines[i]:
-                val_new = re.sub('Testing if ([0-9.]+) is upper bound for lambda_alpha', '\\1', lines[i])
+                val_new = re.sub('^.*Testing if ([0-9.]+) is upper bound for lambda_alpha.*$', '\\1', lines[i])
                 val_new = float(val_new)
                 if not bound_found and val_new == val:
                     bound_found = True

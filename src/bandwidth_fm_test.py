@@ -1,11 +1,13 @@
+from mpi4py import MPI
 import numpy as np
 from scipy.signal import argrelextrema
-from scipy.optimize import minimize
+from scipy.optimize import minimize, leastsq
 from sklearn.neighbors import KernelDensity
 import matplotlib.pyplot as plt
+from scipy.stats import norm
 
 from .util.ApproxGaussianKDE import ApproxGaussianKDE as KDE
-from .util.bootstrap_MPI import bootstrap_mpi as bootstrap
+from .util.bootstrap_MPI import bootstrap, check_equal_mpi
 from .util import MC_error_check
 from .util.GaussianMixture1d import GaussianMixture1d as GM
 
@@ -33,13 +35,15 @@ def bandwidth_test_pval(data, lamtol, mtol, I=(-np.inf, np.inf), N_bootstrap=100
 
 
 @MC_error_check
-def bandwidth_test_pval_mpi(data, lamtol, mtol, I=(-np.inf, np.inf), N_bootstrap=1000):
+def bandwidth_test_pval_mpi(data, lamtol, mtol, I=(-np.inf, np.inf),
+                            N_bootstrap=1000, comm=MPI.COMM_WORLD):
+    check_equal_mpi(comm, data)
     lambda_alpha = 1  # TODO: Replace with correct value according to Cheng & Hall methodology
     h_crit = fisher_marron_critical_bandwidth(data, lamtol, mtol, I)
     KDE_h_crit = KernelDensity(kernel='gaussian', bandwidth=h_crit).fit(data.reshape(-1, 1))
     resampling_scale_factor = 1.0/np.sqrt(1+h_crit**2/np.var(data))
     smaller_equal_crit_bandwidth = bootstrap(
-        is_resampled_unimodal_kde, N_bootstrap, KDE_h_crit,
+        is_resampled_unimodal_kde, N_bootstrap, np.bool_, comm, KDE_h_crit,
         resampling_scale_factor, len(data), h_crit*lambda_alpha, lamtol, mtol, I)
     return np.mean(~smaller_equal_crit_bandwidth)
 
@@ -76,7 +80,8 @@ def is_unimodal_from_kde(kde, lamtol, mtol, I, xtol, debug=False):
 
 def mode_sizes_kde(h, data, lamtol, mtol, I=None, xtol=None, debug=False):
     if xtol is None:
-        xtol = h*0.05  # TODO: Compute error given xtol.
+        xtol = step_size_from_mtol(mtol/2)*h
+    #print "xtol = {}".format(xtol)
     kde = KDE(data, h)
     if I is None:
         I = np.min(data), np.max(data)
@@ -252,7 +257,7 @@ def find_reference_distr(mtol, shoulder_ratio, shoulder_variance=1, min=0, max=4
         return mode_sizes[1]
     minval = 1
     i = 0
-    max_init = 50
+    max_init = 200
     while minval > mtol+m_err_tol:
         x0 = min+(max-min)*np.random.rand(1)
         res_minimizer = minimize(second_mode_size, x0=x0, bounds=[(min, max)], tol=1e-10)
@@ -292,6 +297,21 @@ def merge_into(z_new, z):
     z_merged[np.arange(0, len(z_merged), 2)] = z
     z_merged[np.arange(1, len(z_merged), 2)] = z_new
     return z_merged
+
+
+def bump_size(width):
+    return 1-2*norm.cdf(-width/2)-width*norm.pdf(width/2)
+
+
+def width_from_bump_size(size):
+    return leastsq(lambda width: bump_size(width)-size, x0=0.2)[0]
+
+
+def step_size_from_mtol(mtol):
+    t = width_from_bump_size(mtol)
+    t_star = width_from_bump_size(0.9*mtol)
+    return (t-t_star)/2
+
 
 if __name__ == '__main__':
 
@@ -345,7 +365,7 @@ if __name__ == '__main__':
         print "is_unimodal_kde(h, data, lamtol, mtol) = {}".format(is_unimodal_kde(h, data, lamtol, mtol, debug=False))
         plt.show()
 
-    if 1:
+    if 0:
         mtol = 0
         x = np.linspace(-2, 5, 200)
         for shoulder_ratio in [(1, 3), (1, 5), (1, 7), (1, 7)]:
@@ -353,6 +373,23 @@ if __name__ == '__main__':
             w2, w1 = shoulder_ratio
             y = w1*np.exp(-x**2/2) + w2*np.exp(-(x-a)**2/2)
             plt.plot(x, y)
+        plt.show()
+
+    if 1:
+        from shoulder_distributions import bump_distribution
+        mtol = 1e-6
+        x = np.linspace(-2, 5, 200)
+        for shoulder_ratio in [(2, 1), (4, 1)]:
+            w = np.array(shoulder_ratio, dtype=np.float)
+            w /= np.sum(shoulder_ratio)
+            a = bump_distribution(mtol, w, 1)
+            I = (-1.5, a+1)
+            w1, w2 = shoulder_ratio
+            y = w1*np.exp(-x**2/2) + w2*np.exp(-(x-a)**2/2)
+            plt.plot(x, y)
+            data = np.repeat([0, a], shoulder_ratio)
+            print "data = {}".format(data)
+            print "mode_sizes_kde(1, data, 0, mtol/2, I) = {}".format(mode_sizes_kde(1, data, 0, mtol/2, I))
         plt.show()
 
 

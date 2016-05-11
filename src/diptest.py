@@ -1,11 +1,46 @@
 from __future__ import division
 import numpy as np
+import os
+from collections import Counter
 import matplotlib.pyplot as plt
-try:
-    from rpy2.robjects.packages import importr, data
-    from rpy2.rinterface import RRuntimeError
-except ImportError as e:
-    print "{} --- will not be able to transform dip values to p-value".format(e)
+
+import pandas
+qDiptab_file = os.path.join(os.path.split(__file__)[0], '../qDiptab.csv')
+qDiptab_df = pandas.read_csv(qDiptab_file, index_col=0)
+
+# try:
+#     from rpy2.robjects.packages import importr, data
+#     from rpy2.rinterface import RRuntimeError
+#     Rload = True
+# except ImportError as e:
+#     print "{}, {} --- will not be able to transform dip values to p-value".format(e, e2)
+
+
+def dip_resampled_from_unimod(unimod, N):
+    data = sample_from_unimod(unimod, N)
+    xF, yF = cum_distr(data)
+    return dip_from_cdf(xF, yF)
+
+
+def sample_from_unimod(unimod, N):
+    xU, yU = unimod
+    #print "zip(xU, yU) = {}".format(zip(xU, yU))
+    dxU = np.diff(xU)
+    xU = np.hstack([xU[0], xU[1:][dxU > 0]])
+    yU = np.hstack([yU[0], yU[1:][dxU > 0]])
+    dxU = dxU[dxU > 0]
+    #print "zip(xU, yU) = {}".format(zip(xU, yU))
+    kU = np.diff(yU)/np.diff(xU)
+    cum_probU = np.cumsum(kU*np.diff(xU))
+    t = np.random.rand(N)
+    bins = np.searchsorted(cum_probU, t)
+    bin_cnt = Counter(bins).most_common()
+    data = np.zeros((N,))
+    i = 0
+    for bin, cnt in bin_cnt:
+        data[i:i+cnt] = np.random.rand(cnt)*dxU[bin]+xU[bin]
+        i += cnt
+    return data
 
 
 def dip_from_cdf(xF, yF, plotting=False, verbose=False, eps=1e-12):
@@ -208,9 +243,9 @@ def dip_and_closest_unimodal_from_cdf(xF, yF, plotting=False, verbose=False, eps
         iM_convex = iM[greatest_convex_minorant_sorted(xF[iM], yF[iM])]
 
     # Closest unimodal curve
-    xU = xF[np.hstack([iGfin, iM_convex, iM_concave, iHfin])]
-    yU = np.hstack([yF[iGfin] + D/2, yF[iM_convex] + D/2,
-                    yM_lower[iMM_concave], yF[iHfin] - D/2])
+    xU = xF[np.hstack([iGfin[:-1], iM_convex, iM_concave, iHfin[1:]])]
+    yU = np.hstack([yF[iGfin[:-1]] + D/2, yF[iM_convex] + D/2,
+                    yM_lower[iMM_concave], yF[iHfin[1:]] - D/2])
     # Add points so unimodal curve goes from 0 to 1
     k_start = (yU[1]-yU[0])/(xU[1]-xU[0])
     xU_start = xU[0] - yU[0]/k_start
@@ -238,18 +273,24 @@ def dip_pval_tabinterpol(dip, N):
     '''
     if np.isnan(N) or N < 10:
         return np.nan
-    try:
-        diptest = importr('diptest')
-    except RRuntimeError:
-        utils = importr('utils')
-        utils.chooseCRANmirror(ind=1)
-        utils.install_packages('diptest')
-        diptest = importr('diptest')
 
-    qDiptab = data(diptest).fetch('qDiptab')['qDiptab']
-    diptable = np.array(qDiptab)
-    ps = np.array(qDiptab.colnames).astype(float)
-    Ns = np.array(qDiptab.rownames).astype(int)
+    # if Rload:
+    #     try:
+    #         diptest = importr('diptest')
+    #     except RRuntimeError:
+    #         utils = importr('utils')
+    #         utils.chooseCRANmirror(ind=1)
+    #         utils.install_packages('diptest')
+    #         diptest = importr('diptest')
+
+    #     qDiptab = data(diptest).fetch('qDiptab')['qDiptab']
+    #     diptable = np.array(qDiptab)
+    #     ps = np.array(qDiptab.colnames).astype(float)
+    #     Ns = np.array(qDiptab.rownames).astype(int)
+    # else:
+    diptable = np.array(qDiptab_df)
+    ps = np.array(qDiptab_df.columns).astype(float)
+    Ns = np.array(qDiptab_df.index)
 
     if N >= Ns[-1]:
         dip = transform_dip_to_other_nbr_pts(dip, N, Ns[-1]-0.1)

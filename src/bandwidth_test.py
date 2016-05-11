@@ -1,40 +1,46 @@
+from mpi4py import MPI
 import numpy as np
 from scipy.signal import argrelextrema
 from sklearn.neighbors import KernelDensity
 import matplotlib.pyplot as plt
 
 from .util.ApproxGaussianKDE import ApproxGaussianKDE as KDE
-from .util.bootstrap_MPI import bootstrap_mpi
+from .util.bootstrap_MPI import bootstrap, check_equal_mpi
 from .calibration.lambda_alphas_access import load_lambda
 
 
-def pval_silverman(data, I=(-np.inf, np.inf), N_bootstrap=1000):
+def pval_silverman(data, I=(-np.inf, np.inf), N_bootstrap=1000, comm=MPI.COMM_WORLD):
+    check_equal_mpi(comm, data)
     h_crit = critical_bandwidth(data, I)
     var_data = np.var(data)
     KDE_h_crit = KernelDensity(kernel='gaussian', bandwidth=h_crit).fit(data.reshape(-1, 1))
     resamp_fun = lambda: is_unimodal_kde(
-        h_crit, KDE_h_crit.sample(len(data)).ravel()/np.sqrt(1+h_crit**2/var_data))
-    smaller_equal_crit_bandwidth = bootstrap_mpi(resamp_fun, N_bootstrap, dtype=np.bool_)
+        h_crit, KDE_h_crit.sample(len(data)).ravel()/np.sqrt(1+h_crit**2/var_data), I)
+    smaller_equal_crit_bandwidth = bootstrap(resamp_fun, N_bootstrap, dtype=np.bool_,
+                                             comm=comm)
     return np.mean(~smaller_equal_crit_bandwidth)
 
 
-def pval_calibrated_bandwidth(data, alpha_cal, null, I=(-np.inf, np.inf), N_bootstrap=1000):
+def pval_calibrated_bandwidth(data, alpha_cal, null, I=(-np.inf, np.inf),
+                              N_bootstrap=1000, comm=MPI.COMM_WORLD):
     '''
         NB!: Test is only calibrated to correct level for alpha_cal.
     '''
+    check_equal_mpi(comm, data)
     lambda_alpha = load_lambda('bw', null, alpha_cal)
-    h_crit = critical_bandwidth(data)
+    h_crit = critical_bandwidth(data, I)
     var_data = np.var(data)
     KDE_h_crit = KernelDensity(kernel='gaussian', bandwidth=h_crit).fit(data.reshape(-1, 1))
     resamp_fun = lambda: is_unimodal_kde(
-        h_crit*lambda_alpha, KDE_h_crit.sample(len(data)).ravel()/np.sqrt(1+h_crit**2/var_data))
-    smaller_equal_crit_bandwidth = bootstrap_mpi(resamp_fun, N_bootstrap, dtype=np.bool_)
+        h_crit*lambda_alpha, KDE_h_crit.sample(len(data)).ravel()/np.sqrt(1+h_crit**2/var_data), I)
+    smaller_equal_crit_bandwidth = bootstrap(resamp_fun, N_bootstrap, dtype=np.bool_, comm=comm)
 #    print "smaller_equal_crit_bandwidth[:5] = {}".format(smaller_equal_crit_bandwidth[:5])
     return np.mean(~smaller_equal_crit_bandwidth)
 
 
-def reject_null_calibrated_test_bandwidth(data, alpha, null, I=(-np.inf, np.inf), N_bootstrap=1000):
-    pval = pval_calibrated_bandwidth(data, alpha, null, I, N_bootstrap)
+def reject_null_calibrated_test_bandwidth(data, alpha, null, I=(-np.inf, np.inf),
+                                          N_bootstrap=1000, comm=MPI.COMM_WORLD):
+    pval = pval_calibrated_bandwidth(data, alpha, null, I, N_bootstrap, comm=comm)
     return pval <= alpha
 
 
