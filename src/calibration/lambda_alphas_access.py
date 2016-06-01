@@ -3,16 +3,10 @@ import numpy as np
 import os
 from mpi4py import MPI
 
-host = 'ke'
-
-pkg_dirs = {'ke': '/Users/johnsson/Forskning/Code/modality',
-            'au': '/lunarc/nobackup/users/johnsson/Simulations/modality',
-            'ta': '/home/johnsson/Forskning/Code/modality'}
-
-pkg_dir = pkg_dirs[host]
-lambda_file = os.path.join(pkg_dir, 'src/calibration/lambda_alphas.pkl')
-lambda_bw_csv_file = os.path.join(pkg_dir, 'src/calibration/lambda_alphas_bw.csv')
-lambda_dip_csv_file = os.path.join(pkg_dir, 'src/calibration/lambda_alphas_dip.csv')
+lambda_dir = os.path.dirname(__file__)
+lambda_file = os.path.join(lambda_dir, 'lambda_alphas.pkl')
+lambda_bw_csv_file = os.path.join(lambda_dir, 'lambda_alphas_bw.csv')
+lambda_dip_csv_file = os.path.join(lambda_dir, 'lambda_alphas_dip.csv')
 
 
 def lambda_dict_to_csv():
@@ -85,7 +79,7 @@ def save_lambda(lambda_val, test, null, alpha, upper=None):
         if not null in lambda_dict[test]:
             lambda_dict[test][null] = {}
 
-        if test == 'bw' or test == 'dip_ex' or test == 'fm':
+        if test == 'bw' or test == 'dip_ex' or test == 'fm' or test == 'dip_ex_ad':
             if not alpha in lambda_dict[test][null]:
                 lambda_dict[test][null][alpha] = np.nan*np.ones((2,))
 
