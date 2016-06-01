@@ -11,8 +11,8 @@ def MC_error_check(MCfun):
         res_mean = np.mean(res)
         absolute_error = np.max(np.abs(res-res_mean))
         relative_error = absolute_error/np.abs(res_mean)
-        print "MC sampling relative error: {}".format(relative_error)
-        print "MC sampling absolute error = {}".format(absolute_error)
+        if not np.isnan(relative_error) and relative_error > 1e-4:
+            print "MC sampling relative error: {:.3f}, absolute_error: {:.3f}".format(relative_error, absolute_error)
         return res_mean
 
     return MCfun_check
