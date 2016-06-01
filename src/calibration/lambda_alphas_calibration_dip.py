@@ -118,7 +118,7 @@ def dip_scale_factor_adaptive(alpha, null='normal', lower_lambda=0, upper_lambda
                                 bisection search.
     '''
 
-    N_points = 100
+    N_points = 10000
     rank = comm.Get_rank()
     sampfun = normalsamp if null == 'normal' else shouldersamp
 

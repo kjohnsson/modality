@@ -1,19 +1,9 @@
 from __future__ import division
-import numpy as np
-import os
 from collections import Counter
 import matplotlib.pyplot as plt
-
+import numpy as np
+import os
 import pandas
-qDiptab_file = os.path.join(os.path.split(__file__)[0], '../qDiptab.csv')
-qDiptab_df = pandas.read_csv(qDiptab_file, index_col=0)
-
-# try:
-#     from rpy2.robjects.packages import importr, data
-#     from rpy2.rinterface import RRuntimeError
-#     Rload = True
-# except ImportError as e:
-#     print "{}, {} --- will not be able to transform dip values to p-value".format(e, e2)
 
 
 def dip_resampled_from_unimod(unimod, N):
@@ -275,23 +265,19 @@ def dip_pval_tabinterpol(dip, N):
         dip     -   dip value computed from dip_from_cdf
         N       -   number of observations
     '''
+    qDiptab_file = os.path.join(os.path.dirname(__file__), 'qDiptab.csv')
+    try:
+        if not os.path.exists(qDiptab_file):
+            from . import write_qDiptab
+            write_qDiptab.main()
+
+        qDiptab_df = pandas.read_csv(qDiptab_file, index_col=0)
+    except Exception as e:
+        print "Tabulated p-values not available: {}".format(e)
+
     if np.isnan(N) or N < 10:
         return np.nan
 
-    # if Rload:
-    #     try:
-    #         diptest = importr('diptest')
-    #     except RRuntimeError:
-    #         utils = importr('utils')
-    #         utils.chooseCRANmirror(ind=1)
-    #         utils.install_packages('diptest')
-    #         diptest = importr('diptest')
-
-    #     qDiptab = data(diptest).fetch('qDiptab')['qDiptab']
-    #     diptable = np.array(qDiptab)
-    #     ps = np.array(qDiptab.colnames).astype(float)
-    #     Ns = np.array(qDiptab.rownames).astype(int)
-    # else:
     diptable = np.array(qDiptab_df)
     ps = np.array(qDiptab_df.columns).astype(float)
     Ns = np.array(qDiptab_df.index)
