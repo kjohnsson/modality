@@ -31,6 +31,7 @@ def fp_blurring(data, w):
 
     n_fp = np.zeros(2*len(y), dtype=np.int)
     p_left = (y_count[:-2] + 3*y_count[1:-1])*1./(y_count[:-2] + 6*y_count[1:-1] + y_count[2:])
+    p_left[np.isnan(p_left)] = 0
     n_fp[0::2] = np.random.binomial(y, p_left)
     n_fp[1::2] = y - n_fp[0::2]
     data_fp = []
