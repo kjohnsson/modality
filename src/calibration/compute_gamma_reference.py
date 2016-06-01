@@ -1,5 +1,6 @@
 from scipy.special import beta as betafun
 import numpy as np
+import os
 import cPickle as pickle
 
 beta_betadistr = np.exp(np.arange(20))
@@ -19,6 +20,6 @@ savedat = {'beta_betadistr': beta_betadistr,
            'beta_studentt': beta_studentt,
            'gamma_studentt': gamma_studentt(beta_studentt)}
 
-with open('gammaval.pkl', 'w') as f:
+with open(os.path.join(os.path.dirname(__file__), 'gammaval.pkl'), 'w') as f:
     pickle.dump(savedat, f, -1)
 
