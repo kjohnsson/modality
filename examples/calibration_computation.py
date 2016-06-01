@@ -3,7 +3,7 @@ import time
 import traceback
 import sys
 
-host = 'ke'
+host = 'au'
 
 pkg_dirs = {'ke': '/Users/johnsson/Forskning/Code/modality',
             'au': '/lunarc/nobackup/users/johnsson/Simulations/modality',
@@ -12,8 +12,8 @@ pkg_dirs = {'ke': '/Users/johnsson/Forskning/Code/modality',
 pkg_dir = pkg_dirs[host]
 
 sys.path.append(pkg_dir)
-from src.calibration.lambda_alphas_calibration_bw import h_crit_scale_factor
-from src.calibration.lambda_alphas_calibration_dip import dip_scale_factor_adaptive
+from src.calibration.bandwidth import h_crit_scale_factor
+from src.calibration.dip import dip_scale_factor_adaptive
 
 
 def mpiexceptabort(type, value, tb):

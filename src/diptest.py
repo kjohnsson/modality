@@ -6,6 +6,12 @@ import os
 import pandas
 
 
+def pval_hartigan(data):
+    xF, yF = cum_distr(data)
+    dip = dip_from_cdf(xF, yF)
+    return dip_pval_tabinterpol(dip, len(data))
+
+
 def dip_resampled_from_unimod(unimod, N):
     data = sample_from_unimod(unimod, N)
     xF, yF = cum_distr(data)
@@ -339,38 +345,38 @@ def cum_distr(data, w=None):
     return x, y
 
 
-def lin_interpol(xquery, x, y):
-    xq_ord = np.argsort(xquery)
-    xord = np.argsort(x)
-    values = lin_interpol_sorted(xquery[xq_ord], x[xord], y[xord])
-    return values[np.argsort(xq_ord)]
+# def lin_interpol(xquery, x, y):
+#     xq_ord = np.argsort(xquery)
+#     xord = np.argsort(x)
+#     values = lin_interpol_sorted(xquery[xq_ord], x[xord], y[xord])
+#     return values[np.argsort(xq_ord)]
 
 
-def lin_interpol_sorted(xquery, x, y, eps=1e-10):
-    x, i = unique(x, return_index=True, eps=eps, is_sorted=True)
-    y = y[i]
-    if len(x) == 1:
-        if np.abs(x - xquery).all() < eps:
-            return y*np.ones(len(xquery))
-        else:
-            raise ValueError('interpolation points outside interval')
-    i = 0
-    j = 1
-    if xquery[0] < x[0]-eps:
-        raise ValueError('interpolation points outside interval: xquery[0] = {}, x[0] = {}'.format(xquery[0], x[0]))
-    values = np.zeros(len(xquery))
-    indices = np.zeros(len(xquery))
-    while i < len(xquery) and j < len(x):
-        if xquery[i] <= x[j]+eps:
-            q = (y[j]-y[j-1])/(x[j]-x[j-1])
-            values[i] = y[j-1] + q*(xquery[i]-x[j-1])
-            indices[i] = x[j-1]
-            i += 1
-        else:
-            j += 1
-    if i < len(xquery) - 1:
-        raise ValueError('interpolation points outside interval: xquery[-1] = {}, x[-1] = {}'.format(xquery[-1], x[-1]))
-    return values
+# def lin_interpol_sorted(xquery, x, y, eps=1e-10):
+#     x, i = unique(x, return_index=True, eps=eps, is_sorted=True)
+#     y = y[i]
+#     if len(x) == 1:
+#         if np.abs(x - xquery).all() < eps:
+#             return y*np.ones(len(xquery))
+#         else:
+#             raise ValueError('interpolation points outside interval')
+#     i = 0
+#     j = 1
+#     if xquery[0] < x[0]-eps:
+#         raise ValueError('interpolation points outside interval: xquery[0] = {}, x[0] = {}'.format(xquery[0], x[0]))
+#     values = np.zeros(len(xquery))
+#     indices = np.zeros(len(xquery))
+#     while i < len(xquery) and j < len(x):
+#         if xquery[i] <= x[j]+eps:
+#             q = (y[j]-y[j-1])/(x[j]-x[j-1])
+#             values[i] = y[j-1] + q*(xquery[i]-x[j-1])
+#             indices[i] = x[j-1]
+#             i += 1
+#         else:
+#             j += 1
+#     if i < len(xquery) - 1:
+#         raise ValueError('interpolation points outside interval: xquery[-1] = {}, x[-1] = {}'.format(xquery[-1], x[-1]))
+#     return values
 
 
 def unique(data, return_index, eps, is_sorted=True):
