@@ -1,17 +1,49 @@
 import numpy as np
+import matplotlib.pyplot as plt
 
-from .diptest import dip_and_closest_unimodal_from_cdf, cum_distr
+from .diptest import dip_and_closest_unimodal_from_cdf, cum_distr, least_concave_majorant
+from .util.LinkedIntervals import LinkedIntervals
 
 
-def excess_mass_modes(data, w, n):
+# def excess_mass_modes_test(data, w, n):
+#     if w is None:
+#         w = np.ones(len(data))*1./len(data)
+#     x_F, y_F = cum_distr(data, w)
+#     dip, (x_uni, y_uni) = dip_and_closest_unimodal_from_cdf(x_F, y_F)
+#     print "dip = {}".format(dip)
+#     D_max = -np.inf
+#     for lambd in np.arange(0.001, 10, 1e-4):
+#     #lambd = 0.15
+#         #print "lambd = {}".format(lambd)
+#         D, modes = excess_mass_modes_lambda(data, w, n, lambd)
+#         if D > D_max:
+#             D_max = D
+#             best_modes = modes
+#     print "D_max = {}".format(D_max)
+#     return best_modes
+
+
+def excess_mass_modes(data, w, n, plotting=False):
+    if w is None:
+        w = np.ones(len(data))*1./len(data)
     x_F, y_F = cum_distr(data, w)
-    dip, (x_uni, y_uni) = dip_and_closest_unimodal_from_cdf(x_F, y_F)
+    _, x_lcm, y_lcm = least_concave_majorant(x_F, y_F)
+    #print "i_lcm = {}".format(i_lcm)
+    #x_lcm, y_lcm = x_F[i_lcm], y_F[i_lcm]
+    dip, (x_uni, y_uni) = dip_and_closest_unimodal_from_cdf(x_F, y_F, plotting=plotting)
     print "dip = {}".format(dip)
+    #i = np.argmax(diff(y_uni)/diff(x_uni))
+    #print "x_uni[i], x_uni[i+1] = {}, {}".format(x_uni[i], x_uni[i+1])
+    #print "excess_mass_modes_lambda(data, w, n, diff(y_uni)[i]/diff(x_uni)[i]) = {}".format(excess_mass_modes_lambda(data, w, n, diff(y_uni)[i]/diff(x_uni)[i]))
     D_max = -np.inf
-    for lambd in diff(y_uni)/diff(x_uni):
+    fig, axs = plt.subplots(int(np.ceil((len(y_lcm)-1)*1./5)), 5)
+    for lambd, ax in zip(diff(y_lcm)/diff(x_lcm), axs.ravel()):
+        if np.isinf(lambd):
+            continue
+        print "lambd = {}".format(lambd)
     #lambd = 0.15
         #print "lambd = {}".format(lambd)
-        D, modes = excess_mass_modes_lambda(data, w, n, lambd)
+        D, modes = excess_mass_modes_lambda(data, w, n, lambd, ax)
         if D > D_max:
             D_max = D
             best_modes = modes
@@ -19,9 +51,12 @@ def excess_mass_modes(data, w, n):
     return best_modes
 
 
-def excess_mass_modes_lambda(data, w, n, lambd):
+def excess_mass_modes_lambda(data, w, n, lambd, ax=None):
     order = np.argsort(data)
     H_lambda = np.cumsum(w[order]) - lambd*data[order]
+    if ax is None:
+        fig, ax = plt.subplots()
+    ax.plot(data[order], H_lambda)
     intervals = LinkedIntervals((0, len(order)))
     while len(intervals) < 2*n+1:
         #print "[interval.data for interval in intervals] = {}".format([interval.data for interval in intervals])
@@ -60,82 +95,6 @@ def find_mode(H_lambda, i_lower, i_upper):
 def find_antimode(H_lambda, i_lower, i_upper):
     E, interval = find_mode(-H_lambda, i_lower, i_upper)
     return -E, interval
-
-
-class LinkedList(object):
-    def __init__(self, data=None):
-        self._len = 0
-        if not data is None:
-            self.append(data)
-
-    def __len__(self):
-        return self._len
-
-    def __iter__(self):
-        return LinkedListIterator(self)
-
-    def append(self, data):
-        if len(self) > 0:
-            self.last.next = ListItem(data)
-        else:
-            self.first = ListItem(data)
-            self.before_first = ListItem(None)
-            self.before_first.next = self.first
-            self.last = self.first
-            self._len += 1
-
-
-class ListItem(object):
-    def __init__(self, data):
-        self.data = data
-
-    # @property
-    # def next(self):
-    #     try:
-    #         return self._next
-    #     except AttributeError:
-    #         raise OutsideListError
-
-    # @next.setter
-    # def next(self, next):
-    #     self._next = next
-
-
-class LinkedListIterator(object):
-    def __init__(self, linked_list):
-        self.curr = linked_list.before_first
-
-    def __iter__(self):
-        return self
-
-    def next(self):
-        try:
-            self.curr = self.curr.next
-        except AttributeError:
-            raise StopIteration
-        return self.curr
-
-
-class LinkedIntervals(LinkedList):
-
-    def split(self, i, insert_interval):
-        for j, interval in enumerate(self):
-            if j == i:
-                try:
-                    next = interval.next
-                except AttributeError:
-                    no_next = True
-                else:
-                    no_next = False
-                imin, imax = interval.data
-                insertmin, insertmax = insert_interval
-                interval.data = imin, insertmin
-                interval.next = ListItem((insertmin, insertmax))
-                interval.next.next = ListItem((insertmax, imax))
-                if not no_next:
-                    interval.next.next.next = next
-                self._len += 2
-                return
 
 
 def diff(x):
