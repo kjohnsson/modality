@@ -12,9 +12,9 @@ def knn_density(x, data, k):
     return k/(2*len(data)*x_d_k)
 
 
-def auto_interval(data, k=5, beta=0.2, xmin=0, xmax=1023):
+def auto_interval(data, k=5, beta=0.2, xmin=0., xmax=1023., dx=1.):
     dens_bound = beta/(xmax-xmin)
-    x = np.linspace(xmin, xmax)
+    x = np.arange(xmin, xmax+dx, dx)
     above_bound = x[knn_density(x, data, k) > dens_bound]
     return above_bound[0], above_bound[-1]
 
