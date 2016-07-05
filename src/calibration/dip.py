@@ -1,37 +1,16 @@
 from mpi4py import MPI
 import numpy as np
-from scipy.stats import binom
 import matplotlib.pyplot as plt
 
+from .XSample import XSample
+from .reference_sampfun import normalsamp, shouldersamp
 from ..diptest import cum_distr, dip_and_closest_unimodal_from_cdf, dip_from_cdf, sample_from_unimod
-from ..util.bootstrap_MPI import bootstrap, bootstrap_array, probability_above, probability_in_interval
+from ..util.bootstrap_MPI import bootstrap, bootstrap_array, probability_above
 from .lambda_alphas_access import save_lambda
 from ..util import print_rank0, print_all_ranks
 
 
-def normalsamp(N, comm):
-    if comm.Get_rank() == 0:
-        data = np.random.randn(N)
-    else:
-        data = None
-    data = comm.bcast(data)
-    return data
-
-
-def shouldersamp(N, comm):
-    if comm.Get_rank() == 0:
-        N1 = binom.rvs(N, 1.0/17)
-        N2 = N - N1
-        m1 = -1.25
-        s1 = 0.25
-        data = np.hstack([s1*np.random.randn(N1)+m1, np.random.randn(N2)])
-    else:
-        data = None
-    data = comm.bcast(data)
-    return data
-
-
-class XSampleDip(object):
+class XSampleDip(XSample):
     '''
         Class that samples a data set from a reference distribution,
         computes dip and closest unimodal distribution and from which
@@ -39,12 +18,13 @@ class XSampleDip(object):
     '''
 
     def __init__(self, N, sampfun, comm=MPI.COMM_WORLD):
-        self.N = N
-        self.comm = comm
-        self.rank = self.comm.Get_rank()
-        data = sampfun(N, self.comm)
-        xF, yF = cum_distr(data)
+        super(XSampleDip, self).__init__(N, sampfun, comm)
+        xF, yF = cum_distr(self.data)
         self.dip, self.unimod = dip_and_closest_unimodal_from_cdf(xF, yF)
+        self.statistic = self.dip
+
+    def resampled_statistic_below_scaled_statistic(self, lambda_scale):
+        return self.dip_resampled() < lambda_scale*self.dip
 
     def dip_resampled(self):
         data = self.sample_from_unimod()
@@ -68,7 +48,7 @@ class XSampleDip(object):
         #print "np.mean(dips/self.dip <= lambd) = {}".format(np.mean(dips/self.dip <= lambd))
         return lambdas
 
-    def prob_resampled_dip_below_bound_above_gamma(self, lambda_val, gamma):
+    def prob_resampled_dip_below_bound_above_gamma(self, lambda_scale, gamma):
         '''
             Is the probability that a resampled dip is below
             lambda_val*(original dip), significantly above gamma
@@ -78,104 +58,13 @@ class XSampleDip(object):
             by random with equal probabilities 0.5.
 
             Equivalently, with
-            G_n(\lambda) = P(\hat Delta_{crit}^*/\hat Delta_{crit} <= \lambda)
+            G_n(\lambda) = P(Delta^*/Delta <= \lambda)
             is G_n(\lambda) significantly above or significantly below gamma?
         '''
-        return probability_above(lambda: self.dip_resampled() < lambda_val*self.dip,
-                                 gamma, max_samp=5000, comm=self.comm, batch=20,
-                                 bound_significance=0.01)
+        return self.prob_resampled_statistic_below_bound_above_gamma(lambda_scale, gamma)
 
     def plot_unimodal(self):
         plt.plot(*self.unimod)
-
-
-def binom_confidence_interval(alpha, N_discr, p_discr):
-    '''
-        Two-sided confidence interval of size 1-p_discr for binomial
-        probability parameter given N_discr.
-
-        Equivalently, using a two-sided test
-        with significance level p_discr for alpha \\neq beta, the null
-        hypothesis will not be rejected if beta is in the interval
-        (lower, upper) and N_discr is the number of trials and
-        beta*N_discr is the number of successfull tirals.
-
-    '''
-    lower = binom.ppf(p_discr/2, N_discr, alpha)*1./N_discr
-    upper = binom.ppf(1-p_discr/2, N_discr, alpha)*1./N_discr
-    return lower, upper
-
-
-def dip_scale_factor_adaptive(alpha, null='normal', lower_lambda=0, upper_lambda=2.0,
-                              comm=MPI.COMM_WORLD):
-    '''
-        Computing (and saving) the dip scale factor lambda_alpha for a
-        test calibrated at level alpha.
-
-            lower_lambda    -   lower bound for lambda_alpha in
-                                bisection search.
-            upper_lambda    -   upper bound for lambda_alpha in
-                                bisection search.
-    '''
-
-    N_points = 10000
-    rank = comm.Get_rank()
-    sampfun = normalsamp if null == 'normal' else shouldersamp
-
-    alpha_lower, alpha_upper = binom_confidence_interval(alpha, 5000, 0.1)
-    print "(alpha_lower, alpha_upper) = {}".format((alpha_lower, alpha_upper))
-
-    def rejection_rate_in_interval(lambda_val, significance_first, significance_second):
-        '''
-            P(G_n(lambda) > 1-alpha) => reject null hypothesis
-            G_n(lambda) = probability that resampled data has lower dip
-            than lambda*(original dip)
-        '''
-        print_rank0(comm, "Testing lambda_alpha = {}".format(lambda_val))
-        res = probability_in_interval(
-            lambda: XSampleDip(N_points, sampfun, comm=comm).prob_resampled_dip_below_bound_above_gamma(
-                lambda_val, 1-alpha),
-            alpha_lower, alpha_upper, significance_first=significance_first,
-            significance_second=significance_second,
-            comm=MPI.COMM_SELF, batch=20, print_per_batch=True)
-        print_rank0(comm, "Rejection rate given lambda_val = {} is {}.".format(lambda_val, res))
-        return res
-
-    def save_upper(lambda_bound):
-        save_lambda(lambda_bound, 'dip_ex_ad', null, alpha, upper=True)
-
-    def save_lower(lambda_bound):
-        save_lambda(lambda_bound, 'dip_ex_ad', null, alpha, upper=False)
-
-    seed = np.random.randint(1000)
-    seed = comm.bcast(seed)
-    seed += rank
-    print_all_ranks(comm, "seed = {}".format(seed))
-    np.random.seed(seed)
-
-    lower_lambda = float(lower_lambda)
-    upper_lambda = float(upper_lambda)
-
-    while True:
-        new_lambda = (upper_lambda+lower_lambda)/2
-        rejection_rate_status = rejection_rate_in_interval(
-            new_lambda, significance_first=0.01, significance_second=0.05)
-        if rejection_rate_status == 'in interval':
-            # alpha_lower < P(reject|lambda) < alpha_upper
-            #  => lambda_alpha = lambda
-            save_upper(new_lambda)
-            save_lower(new_lambda)
-            return new_lambda
-        if rejection_rate_status == 'below upper bound':
-            # P(reject|lambda) < alpha_upper => lambda_alpha >= lambda
-            lower_lambda = new_lambda
-            save_lower(lower_lambda)
-            continue
-        if rejection_rate_status == 'above lower bound':
-            # P(reject|lambda) > alpha_lower => lambda_alpha <= lambda
-            upper_lambda = new_lambda
-            save_upper(upper_lambda)
-            continue
 
 
 def dip_scale_factor(alpha, null='normal', lower_lambda=0, upper_lambda=2.0,

@@ -4,30 +4,32 @@ from sklearn.neighbors import KernelDensity
 from scipy.stats import binom
 import matplotlib.pyplot as plt
 
+from .XSample import XSample
 from .lambda_alphas_access import save_lambda
-from ..bandwidth_test import is_unimodal_kde, critical_bandwidth
-from ..bandwidth_fm_test import fisher_marron_critical_bandwidth, is_unimodal_kde as is_unimodal_kde_fm
+from ..critical_bandwidth import is_unimodal_kde, critical_bandwidth
+from ..critical_bandwidth_fm import fisher_marron_critical_bandwidth, is_unimodal_kde as is_unimodal_kde_fm
 from ..shoulder_distributions import bump_distribution
-from ..util.bootstrap_MPI import probability_above, bootstrap
+from ..util.bootstrap_MPI import probability_above
 from ..util import print_rank0, print_all_ranks
 
 
-class XSampleBW(object):
+class XSampleBW(XSample):
 
-    def __init__(self, N, comm=MPI.COMM_SELF):
-        self.comm = comm
-        self.rank = self.comm.Get_rank()
+    def __init__(self, N, sampfun, comm=MPI.COMM_SELF):
+        super(XSampleBW, self).__init__(N, sampfun, comm)
         self.I = (-1.5, 1.5)  # avoiding spurious bumps in the tails
-        self.N = N
-        if self.rank == 0:
-            data = np.random.randn(N)
-        else:
-            data = None
-        data = self.comm.bcast(data)
-        self.h_crit = critical_bandwidth(data, self.I)
-        print_all_ranks(self.comm, "self.h_crit = {}".format(self.h_crit))
-        self.var = np.var(data)
-        self.kde_h_crit = KernelDensity(kernel='gaussian', bandwidth=self.h_crit).fit(data.reshape(-1, 1))
+        self.h_crit = critical_bandwidth(self.data, self.I)
+        #print_all_ranks(self.comm, "self.h_crit = {}".format(self.h_crit))
+        self.var = np.var(self.data)
+        self.kde_h_crit = KernelDensity(kernel='gaussian', bandwidth=self.h_crit).fit(self.data.reshape(-1, 1))
+        self.statistic = self.h_crit
+
+    def resampled_statistic_below_scaled_statistic(self, lambda_scale):
+        '''
+            P( h_{crit}^* <= \lambda*h_{crit})
+                = P(KDE(X^*, \lambda* h_{crit}) is unimodal)
+        '''
+        return self.is_unimodal_resample(lambda_scale)
 
     def is_unimodal_resample(self, lambda_val):
         data = self.kde_h_crit.sample(self.N).reshape(-1)/np.sqrt(1+self.h_crit**2/self.var)
@@ -35,20 +37,15 @@ class XSampleBW(object):
         return is_unimodal_kde(self.h_crit*lambda_val, data, self.I)
 
     def probability_of_unimodal_above(self, lambda_val, gamma):
-        '''
-            G_n(\lambda) = P(\hat h_{crit}^*/\hat h_{crit} <= \lambda)
-                         = P(\hat h_{crit}^* <= \lambda*\hat h_{crit})
-                         = P(KDE(X^*, \lambda*\hat h_{crit}) is unimodal)
-        '''
-        # print "bootstrapping 1000 samples at rank {}:".format(self.rank)
-        # smaller_equal_crit_bandwidth = bootstrap(lambda: self.is_unimodal_resample(lambda_val), 1000, dtype=np.bool_)
-        # pval = np.mean(~smaller_equal_crit_bandwidth)
-        # print "result at rank {}: pval = {}".format(self.rank, pval)+"\n"+"-"*20
-        return probability_above(lambda: self.is_unimodal_resample(lambda_val),
-                                 gamma, max_samp=5000, comm=self.comm, batch=20)
+        return self.prob_resampled_statistic_below_bound_above_gamma(lambda_val, gamma)
+        #return probability_above(lambda: self.is_unimodal_resample(lambda_val),
+        #                         gamma, max_samp=5000, comm=self.comm, batch=20)
 
 
 class XSampleShoulderBW(XSampleBW):
+    '''
+        Obsolete, use XSampleBW with sampfun='shoulder' instead.
+    '''
 
     def __init__(self, N, comm=MPI.COMM_SELF):
         self.comm = comm
