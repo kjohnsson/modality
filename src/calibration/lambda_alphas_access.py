@@ -2,6 +2,15 @@ import cPickle as pickle
 import numpy as np
 import os
 from mpi4py import MPI
+import sys
+import traceback
+
+
+def mpiexceptabort(type, value, tb):
+    traceback.print_exception(type, value, tb)
+    MPI.COMM_WORLD.Abort(1)
+
+sys.excepthook = mpiexceptabort
 
 lambda_dir = os.path.dirname(__file__)
 lambda_file = os.path.join(lambda_dir, 'lambda_alphas.pkl')
@@ -79,7 +88,7 @@ def save_lambda(lambda_val, test, null, alpha, upper=None):
         if not null in lambda_dict[test]:
             lambda_dict[test][null] = {}
 
-        if test == 'bw' or test == 'dip_ex' or test == 'fm' or test == 'dip_ex_ad':
+        if test == 'bw' or test == 'bw_ad' or test == 'dip_ex' or test == 'fm' or test == 'dip_ex_ad':
             if not alpha in lambda_dict[test][null]:
                 lambda_dict[test][null][alpha] = np.nan*np.ones((2,))
 

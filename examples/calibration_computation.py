@@ -6,14 +6,15 @@ import sys
 host = 'au'
 
 pkg_dirs = {'ke': '/Users/johnsson/Forskning/Code/modality',
-            'au': '/lunarc/nobackup/users/johnsson/Simulations/modality',
+            'au': '/lunarc/nobackup/users/johnsson/Code/modality',
             'ta': '/home/johnsson/Forskning/Code/modality'}
 
 pkg_dir = pkg_dirs[host]
 
 sys.path.append(pkg_dir)
-from src.calibration.bandwidth import h_crit_scale_factor
-from src.calibration.dip import dip_scale_factor_adaptive
+#from src.calibration.bandwidth import h_crit_scale_factor
+#from src.calibration.dip import dip_scale_factor_adaptive
+from src.calibration.adaptive_calibration import dip_scale_factor_adaptive, bw_scale_factor_adaptive
 
 
 def mpiexceptabort(type, value, tb):
@@ -34,8 +35,10 @@ def main():
 
     #print "dip_scale_factor(0.05, 'normal', lower_lambda=1.086328125, upper_lambda=1.0953125) = {}".format(
     #    dip_scale_factor(0.05, 'normal', lower_lambda=1.086328125, upper_lambda=1.0953125))
-    print "dip_scale_factor_adaptive(0.05/6, 'shoulder', lower_lambda=1., upper_lambda=2.) = {}".format(
-        dip_scale_factor_adaptive(0.05/6, 'shoulder', lower_lambda=1., upper_lambda=2.))
+    #print "dip_scale_factor_adaptive(0.05/6, 'shoulder', lower_lambda=1., upper_lambda=2.) = {}".format(
+    #    dip_scale_factor_adaptive(0.05/6, 'shoulder', lower_lambda=1., upper_lambda=2.))
+    print "bw_scale_factor_adaptive(0.05/6, 'shoulder', lower_lambda=1., upper_lambda=2.) = {}".format(
+        bw_scale_factor_adaptive(0.05/6, 'shoulder', lower_lambda=1., upper_lambda=2.))
 
     t1 = time.time()
 
