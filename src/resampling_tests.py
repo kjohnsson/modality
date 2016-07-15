@@ -14,7 +14,7 @@ def pval_calibrated_dip(data, alpha_cal, null, N_bootstrap=1000, comm=MPI.COMM_W
         NB!: Test is only calibrated to correct level for alpha_cal.
     '''
     check_equal_mpi(comm, data)
-    lambda_alpha = load_lambda('dip_ex', null, alpha_cal)
+    lambda_alpha = load_lambda('dip_ad', null, alpha_cal)
     xF, yF = diptest.cum_distr(data)
     dip, unimod = diptest.dip_and_closest_unimodal_from_cdf(xF, yF)
     resamp_fun = lambda: diptest.dip_resampled_from_unimod(unimod, len(data))
@@ -40,7 +40,7 @@ def pval_calibrated_bandwidth(data, alpha_cal, null, I=(-np.inf, np.inf),
         NB!: Test is only calibrated to correct level for alpha_cal.
     '''
     check_equal_mpi(comm, data)
-    lambda_alpha = load_lambda('bw', null, alpha_cal)
+    lambda_alpha = load_lambda('bw_ad', null, alpha_cal)
     h_crit = critical_bandwidth(data, I)
     var_data = np.var(data)
     KDE_h_crit = KernelDensity(kernel='gaussian', bandwidth=h_crit).fit(data.reshape(-1, 1))

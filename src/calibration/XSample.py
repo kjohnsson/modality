@@ -14,7 +14,10 @@ class XSample(object):
         self.comm = comm
         self.rank = self.comm.Get_rank()
         self.data = sampfun(N, self.comm)
-        self.statistic = None
+
+    @property
+    def statistic(self):
+        return None
 
     def resampled_statistic_below_scaled_statistic(self, lambda_scale):
         pass

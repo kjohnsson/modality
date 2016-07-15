@@ -88,7 +88,7 @@ def save_lambda(lambda_val, test, null, alpha, upper=None):
         if not null in lambda_dict[test]:
             lambda_dict[test][null] = {}
 
-        if test == 'bw' or test == 'bw_ad' or test == 'dip_ex' or test == 'fm' or test == 'dip_ex_ad':
+        if test == 'bw' or test == 'bw_ad' or test == 'dip_ex' or test == 'fm' or test == 'dip_ex_ad' or 'dip_ad':
             if not alpha in lambda_dict[test][null]:
                 lambda_dict[test][null][alpha] = np.nan*np.ones((2,))
 

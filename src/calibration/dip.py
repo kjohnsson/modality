@@ -7,7 +7,7 @@ from .reference_sampfun import normalsamp, shouldersamp
 from ..diptest import cum_distr, dip_and_closest_unimodal_from_cdf, dip_from_cdf, sample_from_unimod
 from ..util.bootstrap_MPI import bootstrap, bootstrap_array, probability_above
 from .lambda_alphas_access import save_lambda
-from ..util import print_rank0, print_all_ranks
+from ..util import print_rank0, print_all_ranks, fp_blurring
 
 
 class XSampleDip(XSample):
@@ -19,9 +19,30 @@ class XSampleDip(XSample):
 
     def __init__(self, N, sampfun, comm=MPI.COMM_WORLD):
         super(XSampleDip, self).__init__(N, sampfun, comm)
+
+    @property
+    def statistic(self):
+        return self.dip
+
+    @property
+    def dip(self):
+        try:
+            return self._dip
+        except AttributeError:
+            self.compute_dip()
+            return self._dip
+
+    @property
+    def unimod(self):
+        try:
+            return self._unimod
+        except AttributeError:
+            self.compute_dip()
+            return self._unimod
+
+    def compute_dip(self):
         xF, yF = cum_distr(self.data)
-        self.dip, self.unimod = dip_and_closest_unimodal_from_cdf(xF, yF)
-        self.statistic = self.dip
+        self._dip, self._unimod = dip_and_closest_unimodal_from_cdf(xF, yF)
 
     def resampled_statistic_below_scaled_statistic(self, lambda_scale):
         return self.dip_resampled() < lambda_scale*self.dip
@@ -65,6 +86,20 @@ class XSampleDip(XSample):
 
     def plot_unimodal(self):
         plt.plot(*self.unimod)
+
+
+class XSampleDipTrunc(XSampleDip):
+
+    def __init__(self, N, sampfun, comm=MPI.COMM_WORLD):
+        super(XSampleDip, self).__init__(N, sampfun, comm)
+        self.data = self.data[(self.data > -3) & (self.data < 3)]
+        #print "nbr removed: {}".format(N-len(self.data))
+        self.data = np.round((self.data+3)*100./6)
+        self.data = fp_blurring(self.data, 1.0)
+
+    def sample_from_unimod(self):
+        data = sample_from_unimod(self.unimod, self.N)
+        return fp_blurring(np.round(data), 1.0)
 
 
 def dip_scale_factor(alpha, null='normal', lower_lambda=0, upper_lambda=2.0,
