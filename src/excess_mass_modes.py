@@ -1,28 +1,148 @@
 import numpy as np
+import matplotlib.pyplot as plt
 
 from .diptest import dip_and_closest_unimodal_from_cdf, cum_distr
+from .util.LinkedIntervals import LinkedIntervals
 
 
-def excess_mass_modes(data, w, n):
+def Delta_N2(data, w=None):
+    '''
+        Computes Delta_{len(data), 2}, i.e. excess mass difference, in
+        Muller and Sawitski: Excess Mass Estimates and Tests for
+        Multimodality. JASA, Vol. 86, No. 415 (Sep., 1991), pp. 738-746
+
+        Returns tuple where first item is D_{len(data), n}(lambda)
+        and second item is the intervals C_1, C_2 that gives
+        maximal D_{len(data), n}(lambda).
+
+        Input:
+            data (N,)   -   data set
+            w (N,)      -   data weights
+
+    '''
+    lambda_dash = find_lambda_dash(data, w)
+    print "lambda_dash = {}".format(lambda_dash)
+    return D_Nn_lambda(data, w, 2, lambda_dash)
+
+
+def find_lambda_dash(data, w=None):
+    '''
+        Finding lambda_dash in the proof of Theorem 3.1 in
+        Cheng and Hall: On mode testing and empirical approximations to
+        distributions. Statistics & Probability Letters 39 (1998) 245-254.
+        This is the lambda which gives maximal value of Delta_N2.
+
+        Input:
+            data (N,)   -   data set
+            w (N,)      -   data weights
+    '''
+    xF, yF = cum_distr(data, w)
+    dip, unimod = dip_and_closest_unimodal_from_cdf(xF, yF)
+    xU, yU = unimod
+    yUF = np.interp(xF, xU, yU)
+
+    # Where does the unimodal cdf intersect yF+dip and yF-dip?
+    i_upp = np.isclose(yUF, yF+dip)
+    i_low = np.isclose(yUF, yF-dip)
+
+    # The interesting points are when an intersection with yF+dip is
+    # immediately followed by an interstion with yF-dip
+    z = i_upp.astype(np.int) - i_low.astype(np.int)
+    nonzero = (z > 0) | (z < 0)
+    z = z[nonzero]
+    interv = np.diff(z) == -2
+    i_interv_left = np.arange(len(i_upp))[nonzero][:-1][interv]
+    i_interv_right = np.arange(len(i_upp))[nonzero][1:][interv]
+    print zip(i_interv_left, i_interv_right)
+    lam = (yF[i_interv_right]-yF[i_interv_left]-2*dip)/(xF[i_interv_right] - xF[i_interv_left])
+
+    # The highest lambda is lambda_star, the lowest is lambda_dash
+    return np.min(lam)
+
+
+def Delta_Nn_best_lambda_in_unimodal(data, w, n, plotting=False):
+    '''
+        Uses certain reasonable values for lambda to maximize
+        D_Nn_lambda, i.e. to find Delta_{len(data), n}, in
+        Muller and Sawitski: Excess Mass Estimates and Tests for
+        Multimodality. JASA, Vol. 86, No. 415 (Sep., 1991), pp. 738-746.
+        Delta_{len(data), n} should be equal to twice times dip.
+
+        Returns tuple where first item is D_{len(data), n}(lambda)
+        and second item is the intervals C_1, C_2 that gives
+        maximal D_{len(data), n}(lambda).
+
+        Input:
+            data (N,)   -   data set
+            w (N,)      -   data weights
+
+    '''
     x_F, y_F = cum_distr(data, w)
-    dip, (x_uni, y_uni) = dip_and_closest_unimodal_from_cdf(x_F, y_F)
-    print "dip = {}".format(dip)
+    dip, (x_uni, y_uni) = dip_and_closest_unimodal_from_cdf(x_F, y_F, plotting=plotting)
+    #print "dip = {}".format(dip)
     D_max = -np.inf
-    for lambd in diff(y_uni)/diff(x_uni):
-    #lambd = 0.15
+    if plotting:
+        fig, axs = plt.subplots(int(np.ceil((len(x_uni)-1)*1./5)), 5)
+    else:
+        axs = [None]*len(x_uni)-1
+    for lambd, ax in zip(np.diff(y_uni)/np.diff(x_uni), axs.ravel()):
+        if np.isinf(lambd):
+            continue
         #print "lambd = {}".format(lambd)
-        D, modes = excess_mass_modes_lambda(data, w, n, lambd)
+        D, modes = D_Nn_lambda(data, w, n, lambd, ax)
         if D > D_max:
             D_max = D
             best_modes = modes
-    print "D_max = {}".format(D_max)
+    print "D_max - 2*dip= {}".format(D_max-2*dip)  # should be zero
     return best_modes
 
 
-def excess_mass_modes_lambda(data, w, n, lambd):
-    order = np.argsort(data)
-    H_lambda = np.cumsum(w[order]) - lambd*data[order]
-    intervals = LinkedIntervals((0, len(order)))
+def Delta_Nn_brute_search(data, w, n):
+    '''
+        Uses brute force search for lambda to maximize
+        D_Nn_lambda, i.e. to find Delta_{len(data), n}, in
+        Muller and Sawitski: Excess Mass Estimates and Tests for
+        Multimodality. JASA, Vol. 86, No. 415 (Sep., 1991), pp. 738-746.
+        Delta_{len(data), n} should be equal to twice times dip.
+
+        Returns tuple where first item is D_{len(data), n}(lambda)
+        and second item is the intervals C_1, C_2 that gives
+        maximal D_{len(data), n}(lambda).
+
+        Input:
+            data (N,)   -   data set
+            w (N,)      -   data weights
+    '''
+    x_F, y_F = cum_distr(data, w)
+    dip, (x_uni, y_uni) = dip_and_closest_unimodal_from_cdf(x_F, y_F)
+    D_max = -np.inf
+    for lambd in np.arange(0.001, 10, 1e-4):
+    #lambd = 0.15
+        #print "lambd = {}".format(lambd)
+        D, modes = D_Nn_lambda(data, w, n, lambd)
+        if D > D_max:
+            D_max = D
+            best_modes = modes
+    print "D_max - 2*dip = {}".format(D_max-2*dip)
+    return best_modes
+
+
+def D_Nn_lambda(data, w, n, lambd, ax=None):
+    '''
+        Computes D_{len(data), n}(lambda) in
+        Muller and Sawitski: Excess Mass Estimates and Tests for
+        Multimodality. JASA, Vol. 86, No. 415 (Sep., 1991), pp. 738-746
+
+        Returns tuple where first item is D_{len(data), n}(lambda)
+        and second item is the intervals C_1, ..., C_n that gives
+        maximal D_{len(data), n}(lambda).
+
+    '''
+    xF, yF = cum_distr(data, w)
+    H_lambda = yF - lambd*xF
+    if not ax is None:
+        ax.plot(xF, H_lambda)
+    intervals = LinkedIntervals((0, len(xF)))
     while len(intervals) < 2*n+1:
         #print "[interval.data for interval in intervals] = {}".format([interval.data for interval in intervals])
         E_max_next = -np.inf
@@ -37,7 +157,8 @@ def excess_mass_modes_lambda(data, w, n, lambd):
                 i_best = i
         intervals.split(i_best, interval_best)
     #print "[interval.data for interval in intervals] = {}".format([interval.data for interval in intervals])
-    return E_max_next, [(order[interval.data[0]], order[interval.data[1]-1]) for i, interval in enumerate(intervals) if np.mod(i, 2) == 1]
+    return E_max_next, [(xF[interval.data[0]], xF[interval.data[1]-1]) for i, interval
+                        in enumerate(intervals) if np.mod(i, 2) == 1]
 
 
 def find_mode(H_lambda, i_lower, i_upper):
@@ -59,86 +180,10 @@ def find_mode(H_lambda, i_lower, i_upper):
 
 def find_antimode(H_lambda, i_lower, i_upper):
     E, interval = find_mode(-H_lambda, i_lower, i_upper)
-    return -E, interval
+    return E, interval
 
 
-class LinkedList(object):
-    def __init__(self, data=None):
-        self._len = 0
-        if not data is None:
-            self.append(data)
-
-    def __len__(self):
-        return self._len
-
-    def __iter__(self):
-        return LinkedListIterator(self)
-
-    def append(self, data):
-        if len(self) > 0:
-            self.last.next = ListItem(data)
-        else:
-            self.first = ListItem(data)
-            self.before_first = ListItem(None)
-            self.before_first.next = self.first
-            self.last = self.first
-            self._len += 1
-
-
-class ListItem(object):
-    def __init__(self, data):
-        self.data = data
-
-    # @property
-    # def next(self):
-    #     try:
-    #         return self._next
-    #     except AttributeError:
-    #         raise OutsideListError
-
-    # @next.setter
-    # def next(self, next):
-    #     self._next = next
-
-
-class LinkedListIterator(object):
-    def __init__(self, linked_list):
-        self.curr = linked_list.before_first
-
-    def __iter__(self):
-        return self
-
-    def next(self):
-        try:
-            self.curr = self.curr.next
-        except AttributeError:
-            raise StopIteration
-        return self.curr
-
-
-class LinkedIntervals(LinkedList):
-
-    def split(self, i, insert_interval):
-        for j, interval in enumerate(self):
-            if j == i:
-                try:
-                    next = interval.next
-                except AttributeError:
-                    no_next = True
-                else:
-                    no_next = False
-                imin, imax = interval.data
-                insertmin, insertmax = insert_interval
-                interval.data = imin, insertmin
-                interval.next = ListItem((insertmin, insertmax))
-                interval.next.next = ListItem((insertmax, imax))
-                if not no_next:
-                    interval.next.next.next = next
-                self._len += 2
-                return
-
-
-def diff(x):
-    N = len(x)
-    dmat = np.eye(N) + np.diag(np.ones(N-1), -1)
-    return dmat[1:, :].dot(x)
+# def diff(x):
+#     N = len(x)
+#     dmat = np.eye(N) + np.diag(np.ones(N-1), -1)
+#     return dmat[1:, :].dot(x)

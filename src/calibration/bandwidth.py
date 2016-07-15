@@ -15,7 +15,7 @@ from ..util import print_rank0, print_all_ranks
 
 class XSampleBW(XSample):
 
-    def __init__(self, N, sampfun, comm=MPI.COMM_SELF):
+    def __init__(self, N, sampfun, comm=MPI.COMM_WORLD):
         super(XSampleBW, self).__init__(N, sampfun, comm)
         self.I = (-1.5, 1.5)  # avoiding spurious bumps in the tails
         self.h_crit = critical_bandwidth(self.data, self.I)
