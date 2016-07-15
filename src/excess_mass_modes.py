@@ -21,7 +21,6 @@ def Delta_N2(data, w=None):
 
     '''
     lambda_dash = find_lambda_dash(data, w)
-    print "lambda_dash = {}".format(lambda_dash)
     return D_Nn_lambda(data, w, 2, lambda_dash)
 
 
@@ -53,11 +52,16 @@ def find_lambda_dash(data, w=None):
     interv = np.diff(z) == -2
     i_interv_left = np.arange(len(i_upp))[nonzero][:-1][interv]
     i_interv_right = np.arange(len(i_upp))[nonzero][1:][interv]
-    print zip(i_interv_left, i_interv_right)
+    #print zip(i_interv_left, i_interv_right)
     lam = (yF[i_interv_right]-yF[i_interv_left]-2*dip)/(xF[i_interv_right] - xF[i_interv_left])
 
     # The highest lambda is lambda_star, the lowest is lambda_dash
-    return np.min(lam)
+    lambda_dash = np.min(lam)
+    if np.isnan(lambda_dash) or np.isinf(lambda_dash):
+        # (xF, yF-dip/2) and (xF, yF+dip/2) touches at same point.
+        # => Any lambda smaller than or equal to lambda_star will do
+        lambda_dash = np.diff(yU[:2])/np.diff(xU[:2])
+    return lambda_dash
 
 
 def Delta_Nn_best_lambda_in_unimodal(data, w, n, plotting=False):

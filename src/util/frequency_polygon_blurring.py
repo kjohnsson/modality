@@ -64,7 +64,10 @@ def fp_blurring(data, w, even_spaced=False):
     n_fp = np.zeros(2*len(y), dtype=np.int)
     p_left = (y_count[:-2] + 3*y_count[1:-1])*1./(y_count[:-2] + 6*y_count[1:-1] + y_count[2:])
     p_left[np.isnan(p_left)] = 0
-    n_fp[0::2] = np.random.binomial(y, p_left)
+    if not even_spaced:
+        n_fp[0::2] = np.random.binomial(y, p_left)
+    else:
+        n_fp[0::2] = np.round(y*p_left)
     n_fp[1::2] = y - n_fp[0::2]
     data_fp = []
     for n, x0, y0, y1 in zip(n_fp, x_fp[:-1], y_fp[:-1], y_fp[1:]):
