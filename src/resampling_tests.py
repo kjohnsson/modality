@@ -2,7 +2,7 @@ from mpi4py import MPI
 import numpy as np
 from sklearn.neighbors import KernelDensity
 
-from .util.bootstrap_MPI import bootstrap, check_equal_mpi
+from .util.bootstrap_MPI import bootstrap, check_equal_mpi, probability_above, MaxSampExceededException
 from .calibration.lambda_alphas_access import load_lambda
 from . import diptest
 from .critical_bandwidth import critical_bandwidth, is_unimodal_kde
@@ -14,7 +14,10 @@ def pval_calibrated_dip(data, alpha_cal, null, N_bootstrap=1000, comm=MPI.COMM_W
         NB!: Test is only calibrated to correct level for alpha_cal.
     '''
     check_equal_mpi(comm, data)
-    lambda_alpha = load_lambda('dip_ad', null, alpha_cal)
+    try:
+        lambda_alpha = load_lambda('dip_ad', null, alpha_cal)
+    except KeyError:
+        lambda_alpha = load_lambda('dip_ex', null, alpha_cal)
     xF, yF = diptest.cum_distr(data)
     dip, unimod = diptest.dip_and_closest_unimodal_from_cdf(xF, yF)
     resamp_fun = lambda: diptest.dip_resampled_from_unimod(unimod, len(data))
@@ -40,7 +43,10 @@ def pval_calibrated_bandwidth(data, alpha_cal, null, I=(-np.inf, np.inf),
         NB!: Test is only calibrated to correct level for alpha_cal.
     '''
     check_equal_mpi(comm, data)
-    lambda_alpha = load_lambda('bw_ad', null, alpha_cal)
+    try:
+        lambda_alpha = load_lambda('bw_ad', null, alpha_cal)
+    except KeyError:
+        lambda_alpha = load_lambda('bw', null, alpha_cal)
     h_crit = critical_bandwidth(data, I)
     var_data = np.var(data)
     KDE_h_crit = KernelDensity(kernel='gaussian', bandwidth=h_crit).fit(data.reshape(-1, 1))
@@ -61,3 +67,56 @@ def pval_bandwidth_fm(data, lamtol, mtol, I=(-np.inf, np.inf), N_bootstrap=1000,
         is_resampled_unimodal_kde, N_bootstrap, np.bool_, comm, KDE_h_crit,
         resampling_scale_factor, len(data), h_crit*lambda_alpha, lamtol, mtol, I)
     return np.mean(~smaller_equal_crit_bandwidth)
+
+
+def test_calibrated_dip_adaptive_resampling(data, alpha, null, N_bootstrap_max=10000, comm=MPI.COMM_WORLD):
+    check_equal_mpi(comm, data)
+    try:
+        lambda_alpha = load_lambda('dip_ad', null, alpha)
+    except KeyError:
+        lambda_alpha = load_lambda('dip_ex', null, alpha)
+    xF, yF = diptest.cum_distr(data)
+    dip, unimod = diptest.dip_and_closest_unimodal_from_cdf(xF, yF)
+    resamp_fun = lambda: diptest.dip_resampled_from_unimod(unimod, len(data)) > lambda_alpha*dip
+    try:
+        return float(probability_above(resamp_fun, alpha, max_samp=N_bootstrap_max, comm=comm,
+                     batch=100, bound_significance=0.05, exception_at_max_samp=True,
+                     printing=False))
+    except MaxSampExceededException:
+        return alpha
+
+
+def test_calibrated_bandwidth_adaptive_resampling(data, alpha, null, I=(-np.inf, np.inf),
+                                                  N_bootstrap_max=10000, comm=MPI.COMM_WORLD):
+    check_equal_mpi(comm, data)
+    try:
+        lambda_alpha = load_lambda('bw_ad', null, alpha)
+    except KeyError:
+        lambda_alpha = load_lambda('bw', null, alpha)
+    h_crit = critical_bandwidth(data, I)
+    var_data = np.var(data)
+    KDE_h_crit = KernelDensity(kernel='gaussian', bandwidth=h_crit).fit(data.reshape(-1, 1))
+    resamp_fun = lambda: not is_unimodal_kde(
+        h_crit*lambda_alpha, KDE_h_crit.sample(len(data)).ravel()/np.sqrt(1+h_crit**2/var_data), I)
+    try:
+        return float(probability_above(resamp_fun, alpha, max_samp=N_bootstrap_max, comm=comm,
+                     batch=100, bound_significance=0.05, exception_at_max_samp=True,
+                     printing=False))
+    except MaxSampExceededException:
+        return alpha
+
+
+def test_silverman_adaptive_resampling(data, alpha, I=(-np.inf, np.inf),
+                                       N_bootstrap_max=10000, comm=MPI.COMM_WORLD):
+    check_equal_mpi(comm, data)
+    h_crit = critical_bandwidth(data, I)
+    var_data = np.var(data)
+    KDE_h_crit = KernelDensity(kernel='gaussian', bandwidth=h_crit).fit(data.reshape(-1, 1))
+    resamp_fun = lambda: not is_unimodal_kde(
+        h_crit, KDE_h_crit.sample(len(data)).ravel()/np.sqrt(1+h_crit**2/var_data), I)
+    try:
+        return float(probability_above(resamp_fun, alpha, max_samp=N_bootstrap_max, comm=comm,
+                     batch=100, bound_significance=0.05, exception_at_max_samp=True,
+                     printing=False))
+    except MaxSampExceededException:
+        return alpha

@@ -13,6 +13,10 @@ from . import print_rank0, print_all_ranks
 #     return res
 
 
+class MaxSampExceededException(Exception):
+    pass
+
+
 def check_equal_mpi(comm, val):
     val_hash = hash(str(val))
     val_hash_rank0 = comm.bcast(val_hash)
@@ -49,7 +53,7 @@ def bootstrap_array(fun, N, l, dtype=np.float_, *args):
 def probability_in_interval(fun_resample, gamma_lower, gamma_upper,
                             significance_first=0.01, significance_second=0.05,
                             batch=5, comm=MPI.COMM_SELF,
-                            print_per_batch=False):
+                            print_per_batch=False, printing=True):
     N_test_max = 10000
     vals = np.zeros((0,))
     s = "gamma_lower, gamma_upper = {}, {}".format(gamma_lower, gamma_upper)
@@ -71,27 +75,32 @@ def probability_in_interval(fun_resample, gamma_lower, gamma_upper,
                 batch = len(vals)
                 continue  # Expecting less than N_test_max tests to verify lower bound
             s += '\n===\nbelow upper bound\n==='
-            print_rank0(comm, s)
+            if printing:
+                print_rank0(comm, s)
             return 'below upper bound'
         if lower_bound_pval < significance_first:
             if upper_bound_pval < significance_second:
                 s += '\n===\nin interval\n==='
-                print_rank0(comm, s)
+                if printing:
+                    print_rank0(comm, s)
                 return 'in interval'
             if binom.cdf(int(np.round(np.mean(vals)*N_test_max)), N_test_max, gamma_upper) < significance_second:
                 batch = len(vals)
                 continue  # Expecting less than N_test_max tests to verify upper bound
             s += '\n===\nabove lower bound\n==='
-            print_rank0(comm, s)
+            if printing:
+                print_rank0(comm, s)
             return 'above lower bound'
         batch = len(vals)
         if print_per_batch:
-            print_rank0(comm, s)
+            if printing:
+                print_rank0(comm, s)
             s = "gamma_lower, gamma_upper = {}, {}".format(gamma_lower, gamma_upper)
 
 
 def probability_above(fun_resample, gamma, max_samp=None, comm=MPI.COMM_SELF,
-                      batch=5, tol=0, bound_significance=0.01, print_per_batch=False):
+                      batch=5, tol=0, bound_significance=0.01, print_per_batch=False,
+                      exception_at_max_samp=False, printing=True):
     '''
         Returns True if P(fun_resample()) is significantly above gamma,
         returns False if P(fun_resample()) is significantly below gamma.
@@ -101,11 +110,11 @@ def probability_above(fun_resample, gamma, max_samp=None, comm=MPI.COMM_SELF,
     vals = np.zeros((0,))
     s = "gamma = {}".format(gamma)
     while True:
-        vals_new_samp = bootstrap(fun_resample, batch, comm=comm)
-        if gamma == 0.05:
-            print_all_ranks(comm, str(vals_new_samp))
+        vals_new_samp = bootstrap(fun_resample, batch, comm=comm, dtype=np.bool_)
+        #if True:#gamma == 0.05:
+        #    print_all_ranks(comm, str(vals_new_samp))
         #vals_new_samp = vals_new_samp[~np.isnan(vals_new_samp)]
-        vals = np.hstack([vals, vals_new_samp])
+        vals = np.hstack([vals, vals_new_samp.astype(np.float_)])
         upper_bound_pval = binom.cdf(np.sum(vals), len(vals), gamma+tol)
         lower_bound_pval = 1 - binom.cdf(np.sum(vals)-1, len(vals), gamma-tol)
 
@@ -115,14 +124,18 @@ def probability_above(fun_resample, gamma, max_samp=None, comm=MPI.COMM_SELF,
               "\nlower_bound_pval = {}".format(lower_bound_pval))
         if upper_bound_pval <= bound_significance:
             s += '\n---'
-            print_rank0(comm, s)
+            if printing:
+                print_rank0(comm, s)
             return False  # we have lower bound instead.
         if lower_bound_pval <= bound_significance:
             s += "\n---"
-            print_rank0(comm, s)
+            if printing:
+                print_rank0(comm, s)
             return True
         if not max_samp is None:
             if len(vals) > max_samp:
+                if exception_at_max_samp:
+                    raise MaxSampExceededException
                 s += "\n---"+"\n"+"max_samp reached"
                 print_rank0(comm, s)
                 lower_bound = np.random.rand(1) < 0.5
@@ -132,7 +145,8 @@ def probability_above(fun_resample, gamma, max_samp=None, comm=MPI.COMM_SELF,
                 return False
         batch = len(vals)
         if print_per_batch:
-            print_rank0(comm, s)
+            if printing:
+                print_rank0(comm, s)
             s = "gamma = {}".format(gamma)
 
 
