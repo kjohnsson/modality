@@ -22,7 +22,10 @@ class XSampleBW(XSample):
         #print_all_ranks(self.comm, "self.h_crit = {}".format(self.h_crit))
         self.var = np.var(self.data)
         self.kde_h_crit = KernelDensity(kernel='gaussian', bandwidth=self.h_crit).fit(self.data.reshape(-1, 1))
-        self.statistic = self.h_crit
+
+    @property
+    def statistic(self):
+        return self.h_crit
 
     def resampled_statistic_below_scaled_statistic(self, lambda_scale):
         '''
@@ -40,6 +43,32 @@ class XSampleBW(XSample):
         return self.prob_resampled_statistic_below_bound_above_gamma(lambda_val, gamma)
         #return probability_above(lambda: self.is_unimodal_resample(lambda_val),
         #                         gamma, max_samp=5000, comm=self.comm, batch=20)
+
+
+class XSampleBwTrunc(XSampleBW):
+
+    def __init__(self, N, sampfun, range_, comm=MPI.COMM_WORLD, blur_func=None):
+        super(XSampleBwTrunc, self).__init__(N, sampfun, comm)
+        #self.data = self.data[(self.data > -3) & (self.data < 3)]
+        #print "nbr removed: {}".format(N-len(self.data))
+        self.range_ = range_
+        if blur_func is None:
+            blur_func = lambda x: x
+        self.blur_func = blur_func
+        self.set_data_and_I(self.data, self.I)
+
+    def set_data_and_I(self, data, I):
+        self.data = np.round((data+3)*self.range_/6)
+        self.I = [(i+3)*self.range_*1./6 for i in I]
+        self.h_crit = critical_bandwidth(self.data, self.I)
+        self.var = np.var(self.data)
+        self.kde_h_crit = KernelDensity(kernel='gaussian', bandwidth=self.h_crit).fit(self.data.reshape(-1, 1))
+        self.data = self.blur_func(self.data)      
+
+    # def is_unimodal_resample(self, lambda_val):
+    #     data = self.kde_h_crit.sample(self.N).reshape(-1)/np.sqrt(1+self.h_crit**2/self.var)
+    #     #print "np.var(data)/self.var = {}".format(np.var(data)/self.var)
+    #     return is_unimodal_kde(self.h_crit*lambda_val, self.blur_func(np.round(data)), self.I)
 
 
 class XSampleShoulderBW(XSampleBW):

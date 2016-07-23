@@ -91,18 +91,23 @@ class XSampleDip(XSample):
 class XSampleDipTrunc(XSampleDip):
 
     def __init__(self, N, sampfun, range_, comm=MPI.COMM_WORLD, blur_func=None):
-        super(XSampleDip, self).__init__(N, sampfun, comm)
-        self.data = self.data[(self.data > -3) & (self.data < 3)]
+        super(XSampleDipTrunc, self).__init__(N, sampfun, comm)
+        #self.data = self.data[(self.data > -3) & (self.data < 3)]
         #print "nbr removed: {}".format(N-len(self.data))
-        self.data = np.round((self.data+3)*range_/6)
+
         if blur_func is None:
             blur_func = lambda x: x
         self.blur_func = blur_func
-        self.data = self.blur_func(self.data)
+        self.range_ = range_
 
-    def sample_from_unimod(self):
-        data = sample_from_unimod(self.unimod, self.N)
-        return self.blur_func(np.round(data))
+    def set_data(self, data):
+        self.data = np.round((data+3)*self.range_/6)
+        self.data = self.blur_func(self.data)
+        self.compute_dip()
+
+    # def sample_from_unimod(self):
+    #     data = sample_from_unimod(self.unimod, self.N)
+    #     return self.blur_func(np.round(data))
 
 
 def dip_scale_factor(alpha, null='normal', lower_lambda=0, upper_lambda=2.0,
