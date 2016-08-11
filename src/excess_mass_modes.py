@@ -5,19 +5,50 @@ from .diptest import dip_and_closest_unimodal_from_cdf, cum_distr
 from .util.LinkedIntervals import LinkedIntervals
 
 
+def excess_mass_modes(data):
+    '''
+        Finds two most significant modes according to the excess mass
+        test (or equivalently the dip test).
+
+        References:
+
+        K. Johnsson and M. Fontes (2016): What is a `unimodal' cell
+        population? Investigating the calibrated dip and bandwidth tests
+        for unimodality (manuscript).
+
+        Muller and Sawitski (1991): Excess Mass Estimates and Tests for
+        Multimodality. JASA. 86(415).
+
+        Cheng and Hall (1998): On mode testing and empirical
+        approximations to distributions. Statistics & Probability
+        Letters 39.
+
+
+        Input:
+            data    -   one-dimensional data set
+
+        Output:
+            Tuple with two intervals given as (lower, upper).
+    '''
+
+    return Delta_N2(data)[1]
+
+
 def Delta_N2(data, w=None):
     '''
         Computes Delta_{len(data), 2}, i.e. excess mass difference, in
         Muller and Sawitski: Excess Mass Estimates and Tests for
         Multimodality. JASA, Vol. 86, No. 415 (Sep., 1991), pp. 738-746
 
-        Returns tuple where first item is D_{len(data), n}(lambda)
-        and second item is the intervals C_1, C_2 that gives
-        maximal D_{len(data), n}(lambda).
-
         Input:
             data (N,)   -   data set
             w (N,)      -   data weights
+
+        Value:
+            Tuple with two elements:
+                1. D_{len(data), n}(lambda)
+                2. Intervals C_1, C_2 that give
+                   maximal D_{len(data), n}(lambda)
 
     '''
     lambda_dash = find_lambda_dash(data, w)

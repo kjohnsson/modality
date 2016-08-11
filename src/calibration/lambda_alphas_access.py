@@ -12,66 +12,43 @@ def mpiexceptabort(type, value, tb):
 
 sys.excepthook = mpiexceptabort
 
-lambda_dir = os.path.dirname(__file__)
-lambda_file = os.path.join(lambda_dir, 'lambda_alphas.pkl')
-lambda_bw_csv_file = os.path.join(lambda_dir, 'lambda_alphas_bw.csv')
-lambda_dip_csv_file = os.path.join(lambda_dir, 'lambda_alphas_dip.csv')
+lambda_dir = os.path.join(os.path.join(os.path.join(os.path.dirname(__file__), '..'), '..'), 'data')
+lambda_file_precomputed = os.path.join(lambda_dir, 'lambda_alphas.pkl')
 
 
-def lambda_dict_to_csv():
-    with open(lambda_file, 'r') as f:
-        lambda_dict = pickle.load(f)
-
-    with open(lambda_bw_csv_file, 'w') as f:
-        f.write('Test, Null hypothesis, alpha, Lower bound, Upper bound\n')
-
-        for test in lambda_dict:
-            for null in lambda_dict[test]:
-                for alpha in lambda_dict[test][null]:
-                    lambdas = lambda_dict[test][null][alpha]
-                    if not test == 'dip':
-                        f.write('{}, {}, {}, {}, {}\n'.format(test, null, alpha, lambdas[0], lambdas[1]))
-
-    with open(lambda_dip_csv_file, 'w') as f:
-        f.write('Test, Null hypothesis, alpha, Lambda\n')
-
-        for test in lambda_dict:
-            for null in lambda_dict[test]:
-                for alpha in lambda_dict[test][null]:
-                    lambda_ = lambda_dict[test][null][alpha]
-                    if test == 'dip':
-                        f.write('{}, {}, {}, {}\n'.format(test, null, alpha, lambda_))
-
-
-def load_lambdas(test, null, alpha):
+def load_lambdas(test, null, alpha, lambda_file=None):
+    if lambda_file is None:
+        lambda_file = lambda_file_precomputed
     with open(lambda_file, 'r') as f:
         lambda_dict = pickle.load(f)
 
     return lambda_dict[test][null][alpha]
 
 
-def load_lambda(test, null, alpha):
-    lambdas = load_lambdas(test, null, alpha)
+def load_lambda(test, null, alpha, lambda_file=None):
+    if lambda_file is None:
+        lambda_file = lambda_file_precomputed
+    lambdas = load_lambdas(test, null, alpha, lambda_file)
     return np.mean(lambdas)
 
 
-def load_lambda_upper(test, null, alpha):
-    lambdas = load_lambdas(test, null, alpha)
+def load_lambda_upper(test, null, alpha, lambda_file=None):
+    if lambda_file is None:
+        lambda_file = lambda_file_precomputed
+    lambdas = load_lambdas(test, null, alpha, lambda_file)
     return lambdas[1]
 
 
-def load_lambda_lower(test, null, alpha):
-    lambdas = load_lambdas(test, null, alpha)
+def load_lambda_lower(test, null, alpha, lambda_file=None):
+    if lambda_file is None:
+        lambda_file = lambda_file_precomputed
+    lambdas = load_lambdas(test, null, alpha, lambda_file)
     return lambdas[0]
 
 
-def print_all_lambdas():
-    with open(lambda_file, 'r') as f:
-        lambda_dict = pickle.load(f)
-    print "All computed lambda_alpha: {}".format(lambda_dict)
-
-
-def save_lambda(lambda_val, test, null, alpha, upper=None):
+def save_lambda(lambda_val, test, null, alpha, upper=None, lambda_file=None):
+    if lambda_file is None:
+        lambda_file = lambda_file_precomputed
 
     if MPI.COMM_WORLD.Get_rank() == 0:
 
@@ -101,30 +78,59 @@ def save_lambda(lambda_val, test, null, alpha, upper=None):
         with open(lambda_file, 'w') as f:
             pickle.dump(lambda_dict, f, -1)
 
-        lambda_dict_to_csv()
-
         print "Saved {} as {} bound for test {} with null hypothesis {} at alpha = {}".format(
             lambda_val, 'upper' if upper else 'lower', test, null, alpha)
 
+
+def print_computed_calibration(lambda_file=None, include_dip_approx=False):
+    if lambda_file is None:
+        lambda_file = lambda_file_precomputed
+    print "lambda_alpha in {}:".format(lambda_file)
+    print lambda_dict_to_csv(lambda_file)
+
+    if include_dip_approx:
+        print "Approximate lambda_alpha in {}".format(lambda_file)
+        print lambda_dict_dip_approx_to_csv(lambda_file)
+
+
+def lambda_dict_to_csv(lambda_file=None):
+    if lambda_file is None:
+        lambda_file = lambda_file_precomputed
+    with open(lambda_file, 'r') as f:
+        lambda_dict = pickle.load(f)
+
+    csv_str = 'Test, Null hypothesis, alpha, Lower bound, Upper bound\n'
+
+    for test in lambda_dict:
+        for null in lambda_dict[test]:
+            for alpha in lambda_dict[test][null]:
+                lambdas = lambda_dict[test][null][alpha]
+                if not test == 'dip':
+                  # The key 'dip' represents approximately computed constants
+                    csv_str += '{}, {}, {}, {}, {}\n'.format(test, null, alpha, lambdas[0], lambdas[1])
+
+    return csv_str
+
+
+def lambda_dict_dip_approx_to_csv(lambda_file=None):
+    if lambda_file is None:
+        lambda_file = lambda_file_precomputed
+
+    with open(lambda_file, 'r') as f:
+        lambda_dict = pickle.load(f)
+
+    csv_str = 'Test, Null hypothesis, alpha, Lambda\n'
+
+    for test in lambda_dict:
+        for null in lambda_dict[test]:
+            for alpha in lambda_dict[test][null]:
+                lambda_ = lambda_dict[test][null][alpha]
+                if test == 'dip':
+                    csv_str += '{}, {}, {}, {}\n'.format(test, null, alpha, lambda_)
+
+    return csv_str
+
 if __name__ == '__main__':
 
-    if 0:
-        with open(lambda_file, 'w') as f:
-            pickle.dump({}, f, -1)
-
-    if 0:
-        for alpha in [0.05, 0.3]:
-            ulam = np.load('../../upper_lambda_{}.npy'.format(alpha))
-            save_lambda(ulam, 'bw', 'normal', alpha, True)
-            llam = np.load('../../lower_lambda_{}.npy'.format(alpha))
-            save_lambda(llam, 'bw', 'normal', alpha, False)
-
-        alpha = 0.1
-        llam, ulam = 1.25, 1.5
-        save_lambda(ulam, 'bw', 'normal', alpha, True)
-        save_lambda(llam, 'bw', 'normal', alpha, False)
-
-        print_all_lambdas()
-
     if 1:
-        lambda_dict_to_csv()
+        print_computed_calibration()

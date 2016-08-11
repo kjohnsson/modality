@@ -36,8 +36,8 @@ def calibrated_dip_test(data, N_bootstrap=1000):
 
 
 def select_calibration_distribution(d_hat):
-    calibration_dir = os.path.join(os.path.dirname(__file__), 'calibration')
-    with open(os.path.join(calibration_dir, 'gammaval.pkl'), 'r') as f:
+    data_dir = os.path.join(os.path.join(os.path.dirname(__file__), '..'), 'data')
+    with open(os.path.join(data_dir, 'gammaval.pkl'), 'r') as f:
         savedat = pickle.load(f)
 
     if np.abs(d_hat-np.pi) < 1e-4:

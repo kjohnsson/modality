@@ -6,6 +6,26 @@ import os
 import pandas
 
 
+def hartigan_diptest(data):
+    '''
+        P-value according to Hartigan's dip test for unimodality.
+        The dip is computed using the function
+        dip_and_closest_unimodal_from_cdf. From this the p-value is
+        interpolated using a table imported from the R package diptest.
+
+        References:
+            Hartigan and Hartigan (1985): The dip test of unimodality.
+            The Annals of Statistics. 13(1).
+
+        Input:
+            data    -   one-dimensional data set.
+
+        Value:
+            p-value for the test.
+    '''
+    return pval_hartigan(data)
+
+
 def pval_hartigan(data):
     xF, yF = cum_distr(data)
     dip = dip_from_cdf(xF, yF)
