@@ -22,7 +22,7 @@ def bw_scale_factor_adaptive(alpha, null='normal', lower_lambda=0, upper_lambda=
 
 
 def calibration_scale_factor_adaptive(alpha, type_, null='normal', lower_lambda=0, upper_lambda=2.0,
-                                      comm=MPI.COMM_WORLD):
+                                      comm=MPI.COMM_WORLD, save_file=None):
     '''
         Computing (and saving) the dip scale factor lambda_alpha for a
         test calibrated at level alpha.
@@ -60,10 +60,10 @@ def calibration_scale_factor_adaptive(alpha, type_, null='normal', lower_lambda=
         return res
 
     def save_upper(lambda_bound):
-        save_lambda(lambda_bound, type_+'_ad', null, alpha, upper=True)
+        save_lambda(lambda_bound, type_+'_ad', null, alpha, upper=True, lambda_file=save_file)
 
     def save_lower(lambda_bound):
-        save_lambda(lambda_bound, type_+'_ad', null, alpha, upper=False)
+        save_lambda(lambda_bound, type_+'_ad', null, alpha, upper=False, lambda_file=save_file)
 
     seed = np.random.randint(1000)
     seed = comm.bcast(seed)

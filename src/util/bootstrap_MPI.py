@@ -18,9 +18,21 @@ class MaxSampExceededException(Exception):
 
 
 def check_equal_mpi(comm, val):
+    rank = comm.Get_rank()
     val_hash = hash(str(val))
     val_hash_rank0 = comm.bcast(val_hash)
-    if val_hash != val_hash_rank0:
+    not_same_data = val_hash != val_hash_rank0
+
+    not_same_data_all = comm.gather(not_same_data)
+    if rank == 0:
+        not_same_data_any = False
+        for ns in not_same_data_all:
+            if ns:
+                not_same_data_any = True
+    else:
+        not_same_data_any = False
+    not_same_data_any = comm.bcast(not_same_data_any)
+    if not_same_data_any:
         raise ValueError('Not same data across workers.')
 
 

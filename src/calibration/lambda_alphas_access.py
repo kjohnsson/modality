@@ -2,17 +2,9 @@ import cPickle as pickle
 import numpy as np
 import os
 from mpi4py import MPI
-import sys
-import traceback
 
 
-def mpiexceptabort(type, value, tb):
-    traceback.print_exception(type, value, tb)
-    MPI.COMM_WORLD.Abort(1)
-
-sys.excepthook = mpiexceptabort
-
-lambda_dir = os.path.join(os.path.join(os.path.join(os.path.dirname(__file__), '..'), '..'), 'data')
+lambda_dir = os.path.join(os.path.dirname(__file__), 'data')
 lambda_file_precomputed = os.path.join(lambda_dir, 'lambda_alphas.pkl')
 
 
@@ -47,7 +39,7 @@ def load_lambda_lower(test, null, alpha, lambda_file=None):
 
 
 def save_lambda(lambda_val, test, null, alpha, upper=None, lambda_file=None):
-    if lambda_file is None:
+    if lambda_file is 'precomputed':
         lambda_file = lambda_file_precomputed
 
     if MPI.COMM_WORLD.Get_rank() == 0:
@@ -55,8 +47,7 @@ def save_lambda(lambda_val, test, null, alpha, upper=None, lambda_file=None):
         try:
             with open(lambda_file, 'r') as f:
                 lambda_dict = pickle.load(f)
-        except IOError:
-            print "No file {}, starting from emtpy lambda_dict."
+        except (IOError, EOFError):
             lambda_dict = {}
 
         if not test in lambda_dict:

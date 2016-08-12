@@ -6,6 +6,19 @@ import os
 import pandas
 
 
+qDiptab_file = os.path.join(os.path.join(
+    os.path.dirname(__file__), 'data'), 'qDiptab.csv')
+
+if not os.path.exists(qDiptab_file):
+    qDiptab_df = None
+else:
+    qDiptab_df = pandas.read_csv(qDiptab_file, index_col=0)
+
+
+class DataError(Exception):
+    pass
+
+
 def hartigan_diptest(data):
     '''
         P-value according to Hartigan's dip test for unimodality.
@@ -284,22 +297,12 @@ def dip_and_closest_unimodal_from_cdf(xF, yF, plotting=False, verbose=False, eps
 
 def dip_pval_tabinterpol(dip, N):
     '''
-        Tablulated values are obtained from R package 'diptest', which is
-        installed if it is not done previsously. Alternatively, it can be
-        installed from within R by "install.packages('diptest')"
-
         dip     -   dip value computed from dip_from_cdf
         N       -   number of observations
     '''
-    qDiptab_file = os.path.join(os.path.dirname(__file__), 'qDiptab.csv')
-    try:
-        if not os.path.exists(qDiptab_file):
-            from . import write_qDiptab
-            write_qDiptab.main()
 
-        qDiptab_df = pandas.read_csv(qDiptab_file, index_col=0)
-    except Exception as e:
-        print "Tabulated p-values not available: {}".format(e)
+    if qDiptab_df is None:
+        raise DataError("Tabulated p-values not available. See installation instructions.")
 
     if np.isnan(N) or N < 10:
         return np.nan

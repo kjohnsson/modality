@@ -20,6 +20,7 @@ savedat = {'beta_betadistr': beta_betadistr,
            'beta_studentt': beta_studentt,
            'gamma_studentt': gamma_studentt(beta_studentt)}
 
-with open(os.path.join(os.path.dirname(__file__), 'gammaval.pkl'), 'w') as f:
+with open(os.path.join(os.path.join(os.path.join(os.path.join(
+          os.path.dirname(__file__), '..'), '..'), 'data'), 'gammaval.pkl'), 'w') as f:
     pickle.dump(savedat, f, -1)
 

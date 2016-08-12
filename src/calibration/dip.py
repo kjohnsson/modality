@@ -111,7 +111,7 @@ class XSampleDipTrunc(XSampleDip):
 
 
 def dip_scale_factor(alpha, null='normal', lower_lambda=0, upper_lambda=2.0,
-                     comm=MPI.COMM_WORLD):
+                     comm=MPI.COMM_WORLD, save_file=None):
 
     rank = comm.Get_rank()
     sampfun = normalsamp if null == 'normal' else shouldersamp
@@ -137,10 +137,10 @@ def dip_scale_factor(alpha, null='normal', lower_lambda=0, upper_lambda=2.0,
                 lambda_val, 1-alpha), alpha, comm=MPI.COMM_SELF, batch=20, tol=0, print_per_batch=True)  # 0.005)
 
     def save_upper(lambda_bound):
-        save_lambda(lambda_bound, 'dip_ex', null, alpha, upper=True)
+        save_lambda(lambda_bound, 'dip_ex', null, alpha, upper=True, lambda_file=save_file)
 
     def save_lower(lambda_bound):
-        save_lambda(lambda_bound, 'dip_ex', null, alpha, upper=False)
+        save_lambda(lambda_bound, 'dip_ex', null, alpha, upper=False, lambda_file=save_file)
 
     lambda_tol = 1e-4
 

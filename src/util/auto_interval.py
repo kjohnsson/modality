@@ -2,6 +2,18 @@ import numpy as np
 
 
 def knn_density(x, data, k):
+    """
+        K nearest neighbor density estimate.
+
+        References:
+            Silverman (1986): Density Estimation for Statistics
+            and Data Analysis. CRC press.
+
+        Input:
+            x       -   points where density is to be estimated.
+            data    -   data set (one-dimensional).
+            k       -   parameter for estimation.
+    """
     data_sort = np.sort(data)
     I_k = [(data_sort[i], data_sort[i+k-1]) for i in range(len(data_sort)-k+1)]
     #d_k = [I_k_[1] - I_k_[0] for I_k_ in I_k]
@@ -13,6 +25,23 @@ def knn_density(x, data, k):
 
 
 def auto_interval(data, k=5, beta=0.2, xmin=0., xmax=1023., dx=1.):
+    """
+        Selects an interval where the estimated density is above 
+        beta divided by the length of [xmin, xmax], with the purpose to 
+        leave outliers outside the interval.
+
+        Input:
+
+            data    -   data set (one-dimensional).
+            k       -   parameter for knn density estimate.
+            beta    -   parameter for density bound.
+            xmin    -   lowest possible value for interval (also
+                        affects density bound).
+            xmax    -   highest possible value for interval (also
+                        affects density bound).
+            dx      -   grid size for which densities should be
+                        estimated.
+    """
     dens_bound = beta/(xmax-xmin)
     x = np.arange(xmin, xmax+dx, dx)
     above_bound = x[knn_density(x, data, k) > dens_bound]

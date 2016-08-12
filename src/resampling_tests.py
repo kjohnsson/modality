@@ -25,7 +25,7 @@ def calibrated_diptest(data, alpha, null, adaptive_resampling=True, N_adaptive_m
 
         Input:
             data                -   data set (one-dimensional)
-            alpha               -   level for calibration
+            alpha               -   level for calibration and test
             null                -   'shoulder' or 'normal'. Reference
                                     distribution for calibration.
             adaptive_resampling -   should adaptive resampling be used?
@@ -73,7 +73,7 @@ def calibrated_bwtest(data, alpha, null, I=(-np.inf, np.inf), adaptive_resamplin
 
         Input:
             data                -   data set (one-dimensional)
-            alpha               -   level for calibration
+            alpha               -   level for calibration and test
             null                -   'shoulder' or 'normal'. Reference
                                     distribution for calibration.
             I                   -   interval in which modes are counted.
@@ -98,13 +98,13 @@ def calibrated_bwtest(data, alpha, null, I=(-np.inf, np.inf), adaptive_resamplin
                 test is calibrated correctly for p=alpha.
     '''
     if adaptive_resampling:
-        return test_calibrated_dip_adaptive_resampling(
+        return test_calibrated_bandwidth_adaptive_resampling(
             data, alpha, null, I, N_adaptive_max, comm, calibration_file)
     return pval_calibrated_bandwidth(
         data, alpha, null, I, N_non_adaptive, comm, calibration_file)
 
 
-def silverman_bwtest(data, I=(-np.inf, np.inf), adaptive_resampling=True, N_adaptive_max=10000,
+def silverman_bwtest(data, alpha, I=(-np.inf, np.inf), adaptive_resampling=True, N_adaptive_max=10000,
                      N_non_adaptive=1000, comm=MPI.COMM_WORLD):
     '''
         Perform Silverman's bandwidth test.
@@ -121,6 +121,7 @@ def silverman_bwtest(data, I=(-np.inf, np.inf), adaptive_resampling=True, N_adap
 
         Input:
             data                -   data set (one-dimensional)
+            alpha               -   significance level
             I                   -   interval in which modes are counted.
             adaptive_resampling -   should adaptive resampling be used?
             N_adaptive_max      -   when number of bootstrap samples
@@ -140,7 +141,7 @@ def silverman_bwtest(data, I=(-np.inf, np.inf), adaptive_resampling=True, N_adap
     '''
 
     if adaptive_resampling:
-        return test_silverman_adaptive_resampling(data, I, N_adaptive_max, comm)
+        return test_silverman_adaptive_resampling(data, alpha, I, N_adaptive_max, comm)
     return pval_silverman(data, I, N_non_adaptive, comm)
 
 

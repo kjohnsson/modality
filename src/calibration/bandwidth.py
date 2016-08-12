@@ -154,7 +154,7 @@ def get_sampling_class(null, **kwargs):
 
 
 def h_crit_scale_factor(alpha, null='normal', lower_lambda=0, upper_lambda=2.0,
-                        comm=MPI.COMM_WORLD, **samp_class_args):
+                        comm=MPI.COMM_WORLD, save_file=None, **samp_class_args):
 
     rank = comm.Get_rank()
     sampling_class = get_sampling_class(null, **samp_class_args)
@@ -182,16 +182,16 @@ def h_crit_scale_factor(alpha, null='normal', lower_lambda=0, upper_lambda=2.0,
     def save_upper(lambda_bound):
         if null == 'fm':
             save_null = ('fm_{}'.format(samp_class_args['mtol']))
-            save_lambda(lambda_bound, 'fm', save_null, alpha, upper=True)
+            save_lambda(lambda_bound, 'fm', save_null, alpha, upper=True, lambda_file=save_file)
         else:
-            save_lambda(lambda_bound, 'bw', null, alpha, upper=True)
+            save_lambda(lambda_bound, 'bw', null, alpha, upper=True, lambda_file=save_file)
 
     def save_lower(lambda_bound):
         if null == 'fm':
             save_null = ('fm_{}'.format(samp_class_args['mtol']))
-            save_lambda(lambda_bound, 'fm', save_null, alpha, upper=False)
+            save_lambda(lambda_bound, 'fm', save_null, alpha, upper=False, lambda_file=save_file)
         else:
-            save_lambda(lambda_bound, 'bw', null, alpha, upper=False)
+            save_lambda(lambda_bound, 'bw', null, alpha, upper=False, lambda_file=save_file)
 
     lambda_tol = 1e-4
 

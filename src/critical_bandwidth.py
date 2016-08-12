@@ -1,9 +1,8 @@
 import numpy as np
 from scipy.signal import argrelextrema
-from sklearn.neighbors import KernelDensity
 import matplotlib.pyplot as plt
 
-from .util.ApproxGaussianKDE import ApproxGaussianKDE as KDE
+from .util import ApproxGaussianKDE as KDE
 
 
 def critical_bandwidth(data, I=(-np.inf, np.inf), htol=1e-3):
@@ -73,6 +72,8 @@ def merge_into(z_new, z):
     return z_merged
 
 if __name__ == '__main__':
+
+    from sklearn.neighbors import KernelDensity
 
     if 0:
         import time

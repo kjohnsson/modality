@@ -52,7 +52,7 @@ def fp_blurring(data, w, even_spaced=False):
             w       -   bin width
 
     '''
-    y, x = np.histogram(data, bins=np.arange(min(data)-w/2, max(data)+1.5*w, w))
+    y, x = np.histogram(data, bins=np.arange(min(data)-0.5*w, max(data)+1.5*w, w))
     y_count = np.hstack([[0], y, [0]])
     x_fp = np.zeros(2*len(x)-1)
     x_fp[0::2] = x
@@ -72,9 +72,9 @@ def fp_blurring(data, w, even_spaced=False):
     data_fp = []
     for n, x0, y0, y1 in zip(n_fp, x_fp[:-1], y_fp[:-1], y_fp[1:]):
         if not even_spaced:
-            data_fp.append(sample_linear_density(n, x0, w*1./2, y0, y1))
+            data_fp.append(sample_linear_density(n, x0, w*0.5, y0, y1))
         else:
-            data_fp.append(evenly_spaced_linear_density(n, x0, w*1./2, y0, y1))
+            data_fp.append(evenly_spaced_linear_density(n, x0, w*0.5, y0, y1))
     data_blurred = data.copy().astype(np.float)
     for i, (x0, x1) in enumerate(zip(x[:-1], x[1:])):
         ind = (data >= x0)*(data < x1)
