@@ -47,7 +47,7 @@ as well as R and the R package diptest (see Installation).
 Python, OpenMPI and the required Python packages can be installed by:
 ```
 sudo apt-get install python, openmpi  
-sudo pip install numpy, matplotlib, mpi4py, rpy2, sklearn
+sudo pip install numpy, scipy, matplotlib, mpi4py, rpy2, sklearn
 ```
 
 ### Mac
@@ -63,8 +63,11 @@ pip install numpy, scipy, matplotlib, mpi4py, rpy2, sklearn
 ```
 
 ## Installation
-Download modality-1.0.tar.gz and unpack it. In the terminal, go to
-the extracted directory modality-1.0 and write
+Download modality-1.0.tar.gz at
+
+https://github.com/kjohnsson/modality/blob/master/dist/modality-1.0.tar.gz
+
+and unpack it. In the terminal, go to the extracted directory modality-1.0 and write
 ```
 python setup.py install
 ```
