@@ -5,8 +5,10 @@ from scipy.stats import norm
 class ApproxGaussianKDE(object):
     """
         Approximate Gaussian kernel density estimate, using binned data. 
+        For each bin, the data in the bin is replaced by its mean. 
         The bin width is chosen so that the maximal absolute error is 
-        bounded by tol.
+        bounded by tol/(h*sqrt(2*pi). This is shown in the accompanying
+        documentation "Approxmation of kernel density estimator".
 
         Apart from binning, the implementation mimics that of 
         KernelDensity from sklearn.neighbors.
