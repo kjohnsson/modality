@@ -14,12 +14,13 @@ class TestUtil(unittest.TestCase):
             h = 1
             data = np.random.randn(N)
             kde = ApproxGaussianKDE(data, h)
-            KD = KernelDensity(kernel='gaussian', bandwidth=h).fit(data.reshape(-1, 1))
+            KD = KernelDensity(kernel='gaussian', bandwidth=h, rtol=1e-4).fit(data.reshape(-1, 1))
             x = np.linspace(-3, 3, 400)
+            xresh = x.reshape(-1, 1)
             t0 = time.time()
             y_apr_prop = kde.evaluate_prop(x)
             t1 = time.time()
-            y_KD = np.exp(KD.score_samples(x.reshape(-1, 1)))
+            y_KD = np.exp(KD.score_samples(xresh))
             t2 = time.time()
 
             y_apr = y_apr_prop / kde._norm_factor

@@ -2,7 +2,7 @@ import numpy as np
 from scipy.signal import argrelextrema
 from sklearn.neighbors import KernelDensity
 
-from .bandwidth_test import critical_bandwidth_m_modes
+from .critical_bandwidth import critical_bandwidth_m_modes
 
 
 def best_split(data, I=(-np.inf, np.inf)):
