@@ -1,7 +1,7 @@
 import re
 
 
-def summarize_log(logfile):
+def summarize_log(logfile, interval_search=True):
     print "logfile = {}".format(logfile)
 
     with open(logfile, 'r') as f:
@@ -27,7 +27,8 @@ def summarize_log(logfile):
 
         bound_found = False
         max_samp_reached = 0
-        while not ('gamma = {}'.format(alpha) in lines[i]) and i > 0:
+        gamma_str = '00: gamma_lower' if interval_search else 'gamma = {}'.format(alpha)
+        while not (gamma_str in lines[i]) and i > 0:
             if '---' in lines[i]:
                 ntests += 1
             if "Saved" in lines[i]:
@@ -40,7 +41,7 @@ def summarize_log(logfile):
             i -= 1
 
         while i > 0:
-            if 'gamma = {}'.format(alpha) in lines[i]:
+            if gamma_str in lines[i]:
                 mean_val = re.sub('^([0-9]+: ?)?np.mean\(vals\) = ([0-9]+)', '\\2', lines[i+1])
                 mean_val = float(mean_val)
                 nbr_tests = re.sub('^([0-9]+: ?)?len\(vals\) = ([0-9]+)', '\\2', lines[i+2])
@@ -52,7 +53,10 @@ def summarize_log(logfile):
             if 'max_samp' in lines[i]:
                 max_samp_reached += 1
             if "Testing" in lines[i]:
-                val_new = re.sub('^.*Testing if ([0-9.]+) is upper bound for lambda_alpha.*$', '\\1', lines[i])
+                if interval_search:
+                    val_new = re.sub('^.*Testing lambda_alpha = ([0-9.]+)$', '\\1', lines[i])
+                else:
+                    val_new = re.sub('^.*Testing if ([0-9.]+) is upper bound for lambda_alpha.*$', '\\1', lines[i])
                 val_new = float(val_new)
                 if not bound_found and val_new == val:
                     bound_found = True

@@ -27,7 +27,7 @@ def compute_calibration(calibration_file, test, null, alpha, adaptive=True,
 
     if comm.Get_rank() == 0:
         try:
-            with open(calibration_file, 'w') as f:
+            with open(calibration_file, 'a') as f:
                 pass  # check that it is possible to write to file
         except Exception as e:
             exc = e
