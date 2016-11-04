@@ -46,7 +46,7 @@ def calibration_scale_factor_adaptive(alpha, type_, null='normal', lower_lambda=
     def rejection_rate_in_interval(lambda_, significance_first, significance_second):
         '''
             P(G_n(lambda) > 1-alpha) => reject null hypothesis
-            G_n(lambda) = probability that resampled statistic is
+            G_n(lambda) = probability that resampled statistic is less
             than lambda*(original statistic)
         '''
         print_rank0(comm, "Testing lambda_alpha = {}".format(lambda_))
