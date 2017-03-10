@@ -37,5 +37,5 @@ class XSample(object):
             is G_n(\lambda) significantly above or significantly below gamma?
         '''
         return probability_above(lambda: self.resampled_statistic_below_scaled_statistic(lambda_scale),
-                                 gamma, max_samp=5000, comm=self.comm, batch=20,
+                                 gamma, max_samp=10000, comm=self.comm, batch=20,
                                  bound_significance=0.01)

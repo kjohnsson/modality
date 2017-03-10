@@ -11,14 +11,14 @@ class testModality(unittest.TestCase):
 
     def setUp(self):
         self.data = np.random.randn(1000)
-        self.data = MPI.COMM_WORLD.bcast(self.data)
+        #self.data = MPI.COMM_WORLD.bcast(self.data)
         self.alpha = 0.05
         self.I = auto_interval(self.data)
 
-    def test_not_same_data_mpi(self):
-        if MPI.COMM_WORLD.Get_size() > 1:
-            self.assertRaises(ValueError, calibrated_diptest,
-                              np.random.randn(1000), self.alpha, 'normal')
+    # def test_not_same_data_mpi(self):
+    #     if MPI.COMM_WORLD.Get_size() > 1:
+    #         self.assertRaises(ValueError, calibrated_diptest,
+    #                           np.random.randn(1000), self.alpha, 'normal')
 
     def test_calibrated_diptest(self):
         t0 = time.time()

@@ -24,7 +24,7 @@ def knn_density(x, data, k):
     return k/(2*len(data)*x_d_k)
 
 
-def auto_interval(data, k=5, beta=0.2, xmin=0., xmax=1023., dx=1.):
+def auto_interval(data, k=5, beta=0.2, xmin=None, xmax=None, dx=None):
     """
         Selects an interval where the estimated density is above 
         beta divided by the length of [xmin, xmax], with the purpose to 
@@ -42,10 +42,32 @@ def auto_interval(data, k=5, beta=0.2, xmin=0., xmax=1023., dx=1.):
             dx      -   grid size for which densities should be
                         estimated.
     """
+    if xmin is None:
+        xmin = np.min(data)
+    if xmax is None:
+        xmax = np.max(data)
+    if dx is None:
+        dx = (xmax-xmin)*1e-4
     dens_bound = beta/(xmax-xmin)
     x = np.arange(xmin, xmax+dx, dx)
     above_bound = x[knn_density(x, data, k) > dens_bound]
     return above_bound[0], above_bound[-1]
+
+
+def get_I(data, I):
+    if I is None:
+        return (-np.inf, np.inf)
+    if I == 'auto':
+        return auto_interval(data)
+    try:
+        lower, upper = I
+        return lower, upper
+    except:
+        I = I.copy()
+        if not I.pop('type') == 'auto':
+            raise ValueError("Wrong format of I, I = {}".format(I))
+    return auto_interval(data, **I)
+
 
 if __name__ == '__main__':
 
@@ -64,6 +86,7 @@ if __name__ == '__main__':
     plt.figure()
     plt.plot(x, knn_density(x, data, k))
     plt.hist(faithful.data.eruptions, np.arange(1.5, 5.5, 0.5), normed=True)
-    xmin, xmax = auto_interval(data, xmin=1, xmax=6)
+    xmin, xmax = auto_interval(data)
     plt.axvline(xmin)
     plt.axvline(xmax)
+    plt.show()

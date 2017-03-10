@@ -19,7 +19,7 @@ if 'install' in sys.argv:
         """.format(e)
 
 setup(name='modality',
-      version='1.0',
+      version='1.1',
       description='Non-parametric tests for unimodality',
       author='Kerstin Johnsson',
       author_email='kerstin.johnsson@hotmail.com',

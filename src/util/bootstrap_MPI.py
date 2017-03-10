@@ -66,7 +66,7 @@ def probability_in_interval(fun_resample, gamma_lower, gamma_upper,
                             significance_first=0.01, significance_second=0.05,
                             batch=5, comm=MPI.COMM_SELF,
                             print_per_batch=False, printing=True):
-    N_test_max = 10000
+    N_test_max = 20000
     vals = np.zeros((0,))
     s = "gamma_lower, gamma_upper = {}, {}".format(gamma_lower, gamma_upper)
     while True:

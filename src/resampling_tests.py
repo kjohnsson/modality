@@ -3,6 +3,7 @@ import numpy as np
 from sklearn.neighbors import KernelDensity
 
 from .util.bootstrap_MPI import bootstrap, check_equal_mpi, probability_above, MaxSampExceededException
+from .util import get_I
 from .calibration.lambda_alphas_access import load_lambda
 from . import diptest
 from .critical_bandwidth import critical_bandwidth, is_unimodal_kde
@@ -56,7 +57,7 @@ def calibrated_diptest(data, alpha, null, adaptive_resampling=True, N_adaptive_m
         data, alpha, null, N_non_adaptive, comm, calibration_file)
 
 
-def calibrated_bwtest(data, alpha, null, I=(-np.inf, np.inf), adaptive_resampling=True,
+def calibrated_bwtest(data, alpha, null, I='auto', adaptive_resampling=True,
                       N_adaptive_max=10000, N_non_adaptive=1000, comm=MPI.COMM_WORLD,
                       calibration_file=None):
     '''
@@ -76,7 +77,11 @@ def calibrated_bwtest(data, alpha, null, I=(-np.inf, np.inf), adaptive_resamplin
             alpha               -   level for calibration and test
             null                -   'shoulder' or 'normal'. Reference
                                     distribution for calibration.
-            I                   -   interval in which modes are counted.
+            I                   -   interval in which modes are counted
+                                    or None (equiv. to I=(-np.inf, np.inf))
+                                    or 'auto' (equiv. to I=auto_interval(data))
+                                    or {type: 'auto', par_to_auto_interval},
+                                    (equiv. to I=auto_interval(data,**par_to_auto_interval))
             adaptive_resampling -   should adaptive resampling be used?
             N_adaptive_max      -   when number of bootstrap samples
                                     exceeds this value, test is undeter-
@@ -104,7 +109,7 @@ def calibrated_bwtest(data, alpha, null, I=(-np.inf, np.inf), adaptive_resamplin
         data, alpha, null, I, N_non_adaptive, comm, calibration_file)
 
 
-def silverman_bwtest(data, alpha, I=(-np.inf, np.inf), adaptive_resampling=True, N_adaptive_max=10000,
+def silverman_bwtest(data, alpha, I='auto', adaptive_resampling=True, N_adaptive_max=10000,
                      N_non_adaptive=1000, comm=MPI.COMM_WORLD):
     '''
         Perform Silverman's bandwidth test.
@@ -122,7 +127,11 @@ def silverman_bwtest(data, alpha, I=(-np.inf, np.inf), adaptive_resampling=True,
         Input:
             data                -   data set (one-dimensional)
             alpha               -   significance level
-            I                   -   interval in which modes are counted.
+            I                   -   interval in which modes are counted
+                                    or None (equiv. to I=(-np.inf, np.inf))
+                                    or 'auto' (equiv. to I=auto_interval(data))
+                                    or {type: 'auto', par_to_auto_interval},
+                                    (equiv. to I=auto_interval(data,**par_to_auto_interval))
             adaptive_resampling -   should adaptive resampling be used?
             N_adaptive_max      -   when number of bootstrap samples
                                     exceeds this value, test is undeter-
@@ -147,7 +156,7 @@ def silverman_bwtest(data, alpha, I=(-np.inf, np.inf), adaptive_resampling=True,
 
 def test_calibrated_dip_adaptive_resampling(data, alpha, null, N_bootstrap_max=10000,
                                             comm=MPI.COMM_WORLD, calibration_file=None):
-    check_equal_mpi(comm, data)
+    data = comm.bcast(data)
     try:
         lambda_alpha = load_lambda('dip_ad', null, alpha, calibration_file)
            # loading lambda computed with adaptive probablistic bisection search
@@ -165,10 +174,11 @@ def test_calibrated_dip_adaptive_resampling(data, alpha, null, N_bootstrap_max=1
         return alpha
 
 
-def test_calibrated_bandwidth_adaptive_resampling(data, alpha, null, I=(-np.inf, np.inf),
+def test_calibrated_bandwidth_adaptive_resampling(data, alpha, null, I='auto',
                                                   N_bootstrap_max=10000, comm=MPI.COMM_WORLD,
                                                   calibration_file=None):
-    check_equal_mpi(comm, data)
+    data = comm.bcast(data)
+    I = get_I(data, I)
     try:
         lambda_alpha = load_lambda('bw_ad', null, alpha, calibration_file)
            # loading lambda computed with adaptive probablistic bisection search
@@ -188,9 +198,10 @@ def test_calibrated_bandwidth_adaptive_resampling(data, alpha, null, I=(-np.inf,
         return alpha
 
 
-def test_silverman_adaptive_resampling(data, alpha, I=(-np.inf, np.inf),
+def test_silverman_adaptive_resampling(data, alpha, I='auto',
                                        N_bootstrap_max=10000, comm=MPI.COMM_WORLD):
-    check_equal_mpi(comm, data)
+    data = comm.bcast(data)
+    I = get_I(data, I)
     h_crit = critical_bandwidth(data, I)
     var_data = np.var(data)
     KDE_h_crit = KernelDensity(kernel='gaussian', bandwidth=h_crit).fit(data.reshape(-1, 1))
@@ -209,7 +220,7 @@ def pval_calibrated_dip(data, alpha_cal, null, N_bootstrap=1000, comm=MPI.COMM_W
     '''
         NB!: Test is only calibrated to correct level for alpha_cal.
     '''
-    check_equal_mpi(comm, data)
+    data = comm.bcast(data)
     try:
         lambda_alpha = load_lambda('dip_ad', null, alpha_cal, calibration_file)
     except KeyError:
@@ -221,8 +232,9 @@ def pval_calibrated_dip(data, alpha_cal, null, N_bootstrap=1000, comm=MPI.COMM_W
     return np.mean(resamp_dips > lambda_alpha*dip)
 
 
-def pval_silverman(data, I=(-np.inf, np.inf), N_bootstrap=1000, comm=MPI.COMM_WORLD):
-    check_equal_mpi(comm, data)
+def pval_silverman(data, I='auto', N_bootstrap=1000, comm=MPI.COMM_WORLD):
+    I = get_I(data, I)
+    data = comm.bcast(data)
     h_crit = critical_bandwidth(data, I)
     var_data = np.var(data)
     KDE_h_crit = KernelDensity(kernel='gaussian', bandwidth=h_crit).fit(data.reshape(-1, 1))
@@ -233,13 +245,14 @@ def pval_silverman(data, I=(-np.inf, np.inf), N_bootstrap=1000, comm=MPI.COMM_WO
     return np.mean(~smaller_equal_crit_bandwidth)
 
 
-def pval_calibrated_bandwidth(data, alpha_cal, null, I=(-np.inf, np.inf),
+def pval_calibrated_bandwidth(data, alpha_cal, null, I='auto',
                               N_bootstrap=1000, comm=MPI.COMM_WORLD,
                               calibration_file=None):
     '''
         NB!: Test is only calibrated to correct level for alpha_cal.
     '''
-    check_equal_mpi(comm, data)
+    data = comm.bcast(data)
+    I = get_I(data, I)
     try:
         lambda_alpha = load_lambda('bw_ad', null, alpha_cal, calibration_file)
     except KeyError:
@@ -253,9 +266,10 @@ def pval_calibrated_bandwidth(data, alpha_cal, null, I=(-np.inf, np.inf),
     return np.mean(~smaller_equal_crit_bandwidth)
 
 
-def pval_bandwidth_fm(data, lamtol, mtol, I=(-np.inf, np.inf), N_bootstrap=1000,
+def pval_bandwidth_fm(data, lamtol, mtol, I='auto', N_bootstrap=1000,
                       comm=MPI.COMM_WORLD):
-    check_equal_mpi(comm, data)
+    data = comm.bcast(data)
+    I = get_I(data, I)
     lambda_alpha = 1  # TODO: Replace with correct value according to Cheng & Hall methodology
     h_crit = fisher_marron_critical_bandwidth(data, lamtol, mtol, I)
     KDE_h_crit = KernelDensity(kernel='gaussian', bandwidth=h_crit).fit(data.reshape(-1, 1))

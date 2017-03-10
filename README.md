@@ -3,11 +3,16 @@ Statistical tests for evaluating unimodality, in particular:
 - Hartigan's dip test (equivalent to excess mass test).
 - Silverman's bandwidth test.
 - Calibrated versions of the above.
+Estimation of excess mass modes
+
+## Version 1.1
+Added flow cytometry interface, for integrated preprocessing of flow
+cytometry data. See tests/test_fc_interface.py
 
 ### References
 K. Johnsson and M. Fontes (2016): What is a `unimodal' cell
-population? Investigating the calibrated dip and bandwidth tests
-for unimodality (manuscript).
+population? Using statistical tests as criteria for unimodality in
+automated gating and quality control (manuscript).
 
 Hartigan and Hartigan (1985): The dip test of unimodality.
 The Annals of Statistics. 13(1).
@@ -37,7 +42,7 @@ where `N` is the number of cores to be used.
 
 ## Dependencies
 The package has the following dependencies:
-- Python 2.7, including packages scipy, numpy, matplotlib, mpi4py, (rpy2), scikit-learn
+- Python 2.7, including packages scipy, numpy (>= 1.11), matplotlib, mpi4py, (rpy2), scikit-learn
 - OpenMPI
 
 rpy2 is necessary for the uncalibrated version of Hartigan's dip test,
