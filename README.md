@@ -40,6 +40,25 @@ mpirun -n N python test_modality.py
 ```
 where `N` is the number of cores to be used.
 
+### Calling modality from R
+After the package has been installed (see below) it can be used from R
+through the R package XRPython.
+
+NB! In your R session, before XRPython is loaded you have to set the 
+PYTHONPATH environment variable so that it points to the directory where
+your Python packages are installed (e.g. "/usr/local/lib/python2.7/site-packages").
+This can be done with:
+```
+Sys.setenv(PYTHONPATH="`path to packages`")
+```
+If you don't know where your packages are installed, start a Python
+session and write:
+```
+import os
+print os.environ['PYTHONPATH']
+```
+Some basic usage is showcased in the file tests/test_R.R.
+
 ## Dependencies
 The package has the following dependencies:
 - Python 2.7, including packages scipy, numpy (>= 1.11), matplotlib, mpi4py, (rpy2), scikit-learn
@@ -68,11 +87,11 @@ pip install numpy, scipy, matplotlib, mpi4py, rpy2, sklearn
 ```
 
 ## Installation
-Download modality-1.0.tar.gz at
+Download modality-1.1.tar.gz at
 
-https://github.com/kjohnsson/modality/blob/master/dist/modality-1.0.tar.gz
+https://github.com/kjohnsson/modality/blob/master/dist/modality-1.1.tar.gz
 
-and unpack it. In the terminal, go to the extracted directory modality-1.0 and write
+and unpack it. In the terminal, go to the extracted directory modality-1.1 and write
 ```
 python setup.py install
 ```

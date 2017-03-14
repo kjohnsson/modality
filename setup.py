@@ -1,4 +1,5 @@
 import sys
+import src
 from distutils.core import setup
 
 modality_data = []
@@ -19,7 +20,7 @@ if 'install' in sys.argv:
         """.format(e)
 
 setup(name='modality',
-      version='1.1',
+      version=src.__version__,
       description='Non-parametric tests for unimodality',
       author='Kerstin Johnsson',
       author_email='kerstin.johnsson@hotmail.com',
