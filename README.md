@@ -3,7 +3,7 @@ Statistical tests for evaluating unimodality, in particular:
 - Hartigan's dip test (equivalent to excess mass test).
 - Silverman's bandwidth test.
 - Calibrated versions of the above.
-Estimation of excess mass modes
+- Estimation of excess mass modes.
 
 ## Version 1.1
 Added flow cytometry interface, for integrated preprocessing of flow
