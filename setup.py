@@ -11,5 +11,5 @@ setup(name='modality',
       license='MIT',
       packages=['modality', 'modality.calibration', 'modality.util'],
       package_dir={'modality': 'src'},
-      package_data={'modality': modality_data, 'modality.calibration': ['data/*.pkl']},
+      package_data={'modality': ['data/*.csv'], 'modality.calibration': ['data/*.pkl']},
      )

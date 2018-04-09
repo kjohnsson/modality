@@ -98,11 +98,6 @@ python setup.py install
 If installation for only one user is wanted, you can add the option
 `--user`.
 
-During installation, tablulated p-values for Hartigan's dip test
-are obtained from the R package 'diptest'. If the package fails to load,
-rpy2 tries to install it. Another way to install the 'diptest' R package
-is to write "install.packages('diptest')" within R.
-
 ## Using MPI
 When using parallel execution with MPI, it is recommended to add the
 following code to your script, so that the process is aborted if only
