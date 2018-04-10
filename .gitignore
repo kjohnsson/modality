@@ -102,3 +102,12 @@ ENV/
 
 # Mac OSX .DS_Store
 .DS_Store
+
+# custom
+MANIFEST
+TODO.txt
+dev_tests/
+logs/
+obsolete/
+src/calibration/data/obsolete/
+src/data/qDiptab.csv
