@@ -2,7 +2,7 @@ import sys
 import src
 from distutils.core import setup
 
-modality_data = []
+modality_data = ['data/gammaval.pkl']
 
 if 'install' in sys.argv:
 
