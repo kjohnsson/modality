@@ -3,17 +3,7 @@ from collections import Counter
 import matplotlib.pyplot as plt
 import numpy as np
 import os
-import pandas
-
-
-qDiptab_file = os.path.join(os.path.join(
-    os.path.dirname(__file__), 'data'), 'qDiptab.csv')
-
-if not os.path.exists(qDiptab_file):
-    qDiptab_df = None
-else:
-    qDiptab_df = pandas.read_csv(qDiptab_file, index_col=0)
-
+import pandas as pd
 
 class DataError(Exception):
     pass
@@ -301,11 +291,13 @@ def dip_pval_tabinterpol(dip, N):
         N       -   number of observations
     '''
 
-    if qDiptab_df is None:
-        raise DataError("Tabulated p-values not available. See installation instructions.")
-
     if np.isnan(N) or N < 10:
         return np.nan
+
+    qDiptab_fn = os.path.join(os.path.dirname(__file__), 
+      'data', 'diptest.csv')
+
+    qDiptab_df = pd.read_csv(qDiptab_fn, index_col=0)
 
     diptable = np.array(qDiptab_df)
     ps = np.array(qDiptab_df.columns).astype(float)
