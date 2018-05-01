@@ -6,7 +6,6 @@ from modality import __version__
 
 REQUIRED_PACKAGES = ['matplotlib', 'mpi4py', 'numpy', 'pandas',
                      'scikit-learn', 'scipy']
-EXTRAS_REQUIRE = ['rpy2']
 
 modality_data = ['data/gammaval.pkl']
 
