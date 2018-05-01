@@ -1,8 +1,9 @@
 from __future__ import division
 from collections import Counter
+import os
+
 import matplotlib.pyplot as plt
 import numpy as np
-import os
 import pandas
 
 

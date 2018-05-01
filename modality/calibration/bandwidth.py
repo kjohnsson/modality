@@ -1,8 +1,8 @@
+import matplotlib.pyplot as plt
 from mpi4py import MPI
 import numpy as np
 from sklearn.neighbors import KernelDensity
 from scipy.stats import binom
-import matplotlib.pyplot as plt
 
 from .XSample import XSample
 from .lambda_alphas_access import save_lambda

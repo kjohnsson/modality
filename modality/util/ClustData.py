@@ -1,8 +1,9 @@
 from collections import Counter
-from scipy.stats import gaussian_kde
-import numpy as np
+
 import matplotlib.colors as colors
 import matplotlib.pyplot as plt
+import numpy as np
+from scipy.stats import gaussian_kde
 
 from . import MC_error_check
 

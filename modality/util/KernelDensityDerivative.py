@@ -1,8 +1,7 @@
 '''
-    Based on Bruce E. Hansen 2009: Lecture Notes on Nonparametrics,
-    http://www.ssc.wisc.edu/~bhansen/718/NonParametrics1.pdf.
+Based on Bruce E. Hansen 2009: Lecture Notes on Nonparametrics,
+http://www.ssc.wisc.edu/~bhansen/718/NonParametrics1.pdf.
 '''
-
 import numpy as np
 import matplotlib.pyplot as plt
 

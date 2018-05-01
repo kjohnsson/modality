@@ -1,6 +1,12 @@
 import sys
+
+from setuptools import setup, find_packages
+
 from modality import __version__
-from distutils.core import setup
+
+REQUIRED_PACKAGES = ['matplotlib', 'mpi4py', 'numpy', 'pandas',
+                     'scikit-learn', 'scipy']
+EXTRAS_REQUIRE = ['rpy2']
 
 modality_data = ['data/gammaval.pkl']
 
@@ -16,6 +22,7 @@ if 'install' in sys.argv:
               "p-values requires the R package 'diptest' as well as the "
               "python module rpy2.".format(e))
 
+print(find_packages())
 setup(name='modality',
       version=__version__,
       description='Non-parametric tests for unimodality',
@@ -23,6 +30,8 @@ setup(name='modality',
       author_email='kerstin.johnsson@hotmail.com',
       url='https://github.com/kjohnsson/modality',
       license='MIT',
-      packages=['modality', 'modality.calibration', 'modality.util'],
+      packages=find_packages(),
       package_data={'modality': modality_data,
-                    'modality.calibration': ['data/*.pkl']})
+                    'modality.calibration': ['data/*.pkl']},
+      install_requires=REQUIRED_PACKAGES,
+      extras_require=EXTRAS_REQUIRE)

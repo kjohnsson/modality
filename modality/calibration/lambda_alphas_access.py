@@ -1,8 +1,8 @@
 import cPickle as pickle
-import numpy as np
 import os
-from mpi4py import MPI
 
+from mpi4py import MPI
+import numpy as np
 
 lambda_dir = os.path.join(os.path.dirname(__file__), 'data')
 lambda_file_precomputed = os.path.join(lambda_dir, 'lambda_alphas.pkl')

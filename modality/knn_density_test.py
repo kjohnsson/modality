@@ -4,11 +4,10 @@
     tools with measures of significance. Journal of Multivariate
     Analysis 100 (2009).
 '''
-
-import numpy as np
-from sklearn.neighbors import NearestNeighbors
-import pandas
 import matplotlib.pyplot as plt
+import numpy as np
+import pandas
+from sklearn.neighbors import NearestNeighbors
 from scipy.stats import f, norm, chi2
 from scipy.special import gamma as gammafun
 

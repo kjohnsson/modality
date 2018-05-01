@@ -1,7 +1,9 @@
-from scipy.special import beta as betafun
-import numpy as np
-import os
 import cPickle as pickle
+import os
+
+import numpy as np
+from scipy.special import beta as betafun
+
 
 beta_betadistr = np.exp(np.arange(20))
 gamma_betadistr = lambda beta: 2*(beta-1)*betafun(beta, 1.0/2)**2
