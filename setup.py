@@ -32,5 +32,4 @@ setup(name='modality',
       packages=find_packages(),
       package_data={'modality': modality_data,
                     'modality.calibration': ['data/*.pkl']},
-      install_requires=REQUIRED_PACKAGES,
-      extras_require=EXTRAS_REQUIRE)
+      install_requires=REQUIRED_PACKAGES)
