@@ -2,7 +2,7 @@ import sys
 
 from setuptools import setup, find_packages
 
-from modality import __version__
+#from modality import __version__
 
 REQUIRED_PACKAGES = ['matplotlib', 'mpi4py', 'numpy', 'pandas',
                      'scikit-learn', 'scipy']
@@ -23,7 +23,7 @@ if 'install' in sys.argv:
 
 print(find_packages())
 setup(name='modality',
-      version=__version__,
+      version='1.1',
       description='Non-parametric tests for unimodality',
       author='Kerstin Johnsson',
       author_email='kerstin.johnsson@hotmail.com',
