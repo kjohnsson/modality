@@ -15,3 +15,8 @@ install:
 
 # command to run tests
 script: python -m unittest discover tests/
+
+notifications:
+  email:
+      on_success: never # default: change
+      on_failure: change # default: always
