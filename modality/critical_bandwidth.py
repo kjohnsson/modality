@@ -1,3 +1,5 @@
+from __future__ import unicode_literals
+from __future__ import print_function
 import numpy as np
 from scipy.signal import argrelextrema
 import matplotlib.pyplot as plt
@@ -80,16 +82,16 @@ if __name__ == '__main__':
         N = 1000
         data = np.hstack([np.random.randn(N/2), np.random.randn(N/4)+4])
         h = 0.1
-        print "is_unimodal_kde(h, data) = {}".format(is_unimodal_kde(h, data))
+        print("is_unimodal_kde(h, data) = {}".format(is_unimodal_kde(h, data)))
         #plt.show()
         t0 = time.time()
         h_crit = critical_bandwidth(data)
-        print "critical_bandwidth(data) = {}".format(h_crit)
+        print("critical_bandwidth(data) = {}".format(h_crit))
         t1 = time.time()
-        print "pval_silverman(data) = {}".format(pval_silverman(data))
+        print("pval_silverman(data) = {}".format(pval_silverman(data)))
         t2 = time.time()
-        print "Critical bandwidth computation time: {}".format(t1-t0)
-        print "Silverman test computation time: {}".format(t2-t1)
+        print("Critical bandwidth computation time: {}".format(t1-t0))
+        print("Silverman test computation time: {}".format(t2-t1))
 
         fig, ax = plt.subplots()
         ax.hist(data, bins=50, normed=True)
@@ -100,15 +102,15 @@ if __name__ == '__main__':
     if 0:
         data = np.random.randn(1000)
         h = .5
-        print "np.std(data) = {}".format(np.std(data))
+        print("np.std(data) = {}".format(np.std(data)))
         resamp = KernelDensity(kernel='gaussian', bandwidth=h).fit(data).sample(1000)/np.sqrt(1+h**2/np.var(data))
-        print "np.std(resamp) = {}".format(np.std(resamp))
+        print("np.std(resamp) = {}".format(np.std(resamp)))
 
     if 0:
         N = 1000
         data = np.hstack([np.random.randn(N/2), np.random.randn(N/4)+4])
         h = 0.1
-        print "is_unimodal_kde(h, data) = {}".format(is_unimodal_kde(h, data))
+        print("is_unimodal_kde(h, data) = {}".format(is_unimodal_kde(h, data)))
         #plt.show()
         h_crit = critical_bandwidth_m_modes(data, 2)
         x = np.linspace(-3, 8, 200)
@@ -121,12 +123,12 @@ if __name__ == '__main__':
         data = np.hstack([np.random.randn(N/2), np.random.randn(N/4)+3])
         if 1:
             I = (-1.5, 5.5)
-            print "pval_silverman(data, I) = {}".format(pval_silverman(data, I))
-            print "reject_null_calibrated_test_bandwidth(data, 0.05, 'normal', I) = {}".format(reject_null_calibrated_test_bandwidth(data, 0.05, 'normal', I))
-            print "reject_null_calibrated_test_bandwidth(data, 0.05, 'shoulder', I) = {}".format(reject_null_calibrated_test_bandwidth(data, 0.05, 'shoulder', I))
+            print("pval_silverman(data, I) = {}".format(pval_silverman(data, I)))
+            print("reject_null_calibrated_test_bandwidth(data, 0.05, 'normal', I) = {}".format(reject_null_calibrated_test_bandwidth(data, 0.05, 'normal', I)))
+            print("reject_null_calibrated_test_bandwidth(data, 0.05, 'shoulder', I) = {}".format(reject_null_calibrated_test_bandwidth(data, 0.05, 'shoulder', I)))
 
         x = np.linspace(-3, 8, 200)
-        print "x.shape = {}".format(x.shape)
+        print("x.shape = {}".format(x.shape))
         y = KernelDensity(kernel='gaussian', bandwidth=0.2).fit(data.reshape(-1, 1)).score_samples(x.reshape(-1, 1))
         plt.plot(x, np.exp(y))
         plt.show()
@@ -134,18 +136,18 @@ if __name__ == '__main__':
     if 1:
         from .bandwidth_fm_test import find_reference_distr
         seed = np.random.randint(1000)
-        print "seed = {}".format(seed)
+        print("seed = {}".format(seed))
         np.random.seed(seed)
         mtol = 0.001
         a = find_reference_distr(mtol)
-        print "a = {}".format(a)
+        print("a = {}".format(a))
         N = 2000
         data = np.hstack([np.random.randn(N/2), np.random.randn(N/4)+a])
         if 1:
             I = (-1.5, a+1.5)
-            print "pval_silverman(data, I) = {}".format(pval_silverman(data, I))
-            print "reject_null_calibrated_test_bandwidth(data, 0.05, 'normal', I) = {}".format(reject_null_calibrated_test_bandwidth(data, 0.05, 'normal', I))
-            print "reject_null_calibrated_test_bandwidth(data, 0.05, 'shoulder', I) = {}".format(reject_null_calibrated_test_bandwidth(data, 0.05, 'shoulder', I))
+            print("pval_silverman(data, I) = {}".format(pval_silverman(data, I)))
+            print("reject_null_calibrated_test_bandwidth(data, 0.05, 'normal', I) = {}".format(reject_null_calibrated_test_bandwidth(data, 0.05, 'normal', I)))
+            print("reject_null_calibrated_test_bandwidth(data, 0.05, 'shoulder', I) = {}".format(reject_null_calibrated_test_bandwidth(data, 0.05, 'shoulder', I)))
 
         x = np.linspace(-3, 8, 200)
         y = KernelDensity(kernel='gaussian', bandwidth=0.2).fit(data.reshape(-1, 1)).score_samples(x.reshape(-1, 1))

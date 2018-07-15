@@ -1,4 +1,6 @@
+from __future__ import unicode_literals
 from __future__ import division
+from __future__ import print_function
 from collections import Counter
 import os
 
@@ -157,7 +159,7 @@ def dip_and_closest_unimodal_from_cdf(xF, yF, plotting=False, verbose=False, eps
 
         if d <= D:
             if verbose:
-                print "Difference in modal interval smaller than current dip"
+                print("Difference in modal interval smaller than current dip")
             break
 
         # Find new modal interval so that largest difference is at endpoint
@@ -188,7 +190,7 @@ def dip_and_closest_unimodal_from_cdf(xF, yF, plotting=False, verbose=False, eps
 
         if xF[U0]-xF[L0] < eps:
             if verbose:
-                print "Modal interval zero length"
+                print("Modal interval zero length")
             break
 
         if plotting:
@@ -204,7 +206,7 @@ def dip_and_closest_unimodal_from_cdf(xF, yF, plotting=False, verbose=False, eps
 
         if d <= D:
             if verbose:
-                print "Difference in modal interval smaller than new dip"
+                print("Difference in modal interval smaller than new dip")
             break
 
     if plotting:
@@ -469,7 +471,7 @@ def least_concave_majorant_sorted(x, y, eps=1e-12):
             icurr += 2 + np.argmax(q)
             i.append(icurr)
         else:
-            print "x[icurr] = {}, x[icurr+1] = {}, x[icurr+2] = {}".format(x[icurr], x[icurr+1], x[icurr+2])
+            print("x[icurr] = {}, x[icurr+1] = {}, x[icurr+2] = {}".format(x[icurr], x[icurr+1], x[icurr+2]))
             raise ValueError('Maximum two copies of each x-value allowed')
 
     return np.array(i)
@@ -480,13 +482,13 @@ if __name__ == '__main__':
         if seed is None:
             dat = np.hstack([np.arange(0, 1, .1), np.arange(2, 3, 0.1)])
         else:
-            print "seed = {}".format(seed)
+            print("seed = {}".format(seed))
             np.random.seed(seed)
             dat = np.hstack([np.random.randn(10), np.random.randn(10)+2])
         xcum, ycum = cum_distr(dat, np.ones(len(dat))*1./len(dat))
         dip = dip_from_cdf(xcum, ycum, verbose=True, plotting=True)
-        print "dip = {}".format(dip)
+        print("dip = {}".format(dip))
 
     for (dip, N, M) in [(0.005, 20000, 50000), (0.01, 2000, 5000), (0.001, 70000, 10000), (0.0005, 1000000, 10000)]:
-        print "dip_pval_tabinterpol(dip, N) = {}".format(dip_pval_tabinterpol(dip, N))
-        print "dip_pval_tabinterpol(transform_dip_to_other_nbr_pts(dip, N, M), M) = {}".format(dip_pval_tabinterpol(transform_dip_to_other_nbr_pts(dip, N, M), M))
+        print("dip_pval_tabinterpol(dip, N) = {}".format(dip_pval_tabinterpol(dip, N)))
+        print("dip_pval_tabinterpol(transform_dip_to_other_nbr_pts(dip, N, M), M) = {}".format(dip_pval_tabinterpol(transform_dip_to_other_nbr_pts(dip, N, M), M)))

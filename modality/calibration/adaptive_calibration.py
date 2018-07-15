@@ -1,3 +1,5 @@
+from __future__ import unicode_literals
+from __future__ import print_function
 from mpi4py import MPI
 import numpy as np
 
@@ -41,7 +43,7 @@ def calibration_scale_factor_adaptive(alpha, type_, null='normal', lower_lambda=
     xsample = typedict[type_]
 
     alpha_lower, alpha_upper = binom_confidence_interval(alpha, 5000, 0.1)
-    print "(alpha_lower, alpha_upper) = {}".format((alpha_lower, alpha_upper))
+    print("(alpha_lower, alpha_upper) = {}".format((alpha_lower, alpha_upper)))
 
     def rejection_rate_in_interval(lambda_, significance_first, significance_second):
         '''

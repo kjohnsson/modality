@@ -1,3 +1,5 @@
+from __future__ import unicode_literals
+from __future__ import print_function
 import numpy as np
 from scipy.stats import norm
 
@@ -52,8 +54,8 @@ if __name__ == '__main__':
     gm = GaussianMixture1d(means, covs, weights)
     dat = gm.sample(500000)
     q = -1
-    print "np.mean(dat < q) = {}".format(np.mean(dat < q))
-    print "gm.distr(q) = {}".format(gm.distr(q))
+    print("np.mean(dat < q) = {}".format(np.mean(dat < q)))
+    print("gm.distr(q) = {}".format(gm.distr(q)))
     plt.hist(dat, bins=100, normed=True)
     x = np.linspace(-3, 2.5, 100)
     plt.plot(x, gm.evaluate(x))
