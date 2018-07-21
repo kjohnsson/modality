@@ -1,10 +1,15 @@
+from __future__ import unicode_literals
 '''
     Alternative calibration of dip test (no resampling) based on
         M.-Y. Cheng and P. Hall. 1999: Calibrating the excess mass and
         dip tests of modality. Journal of the Royal Statistical Society:
         Series B (Statistical Methodology), 60(3): 579–589, 1998.
 '''
-import cPickle as pickle
+from __future__ import print_function
+try:
+    import cPickle as pickle
+except ImportError:
+    import pickle
 import os
 
 import matplotlib.pyplot as plt
@@ -105,5 +110,5 @@ if __name__ == '__main__':
         t0 = time.time()
         pval = calibrated_dip_test(data)
         t1 = time.time()
-        print "pval = {}".format(pval)
-        print "Time consumption calibrated dip test: {}".format(t1-t0)
+        print("pval = {}".format(pval))
+        print("Time consumption calibrated dip test: {}".format(t1-t0))

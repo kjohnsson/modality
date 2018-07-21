@@ -111,3 +111,5 @@ logs/
 obsolete/
 src/calibration/data/obsolete/
 src/data/qDiptab.csv
+
+*.bak

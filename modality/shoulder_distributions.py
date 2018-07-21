@@ -1,3 +1,5 @@
+from __future__ import unicode_literals
+from __future__ import print_function
 import numpy as np
 from scipy.optimize import leastsq
 from scipy.stats import norm
@@ -25,7 +27,7 @@ def shoulder_distribution(w, sd):
     i = 0
     while i < maxiter:
         x0 = a0 if a0 > 1 else 0
-        res = leastsq(lambda (x, a): [shoulder_derivative(x, w, a, sd), shoulder_derivative2(x, w, a, sd)], x0=(x0, a0))
+        res = leastsq(lambda x, a: [shoulder_derivative(x, w, a, sd), shoulder_derivative2(x, w, a, sd)], x0=(x0, a0))
         x_a = res[0]
         x_shoulder = x_a[0]
         a_shoulder = x_a[1]
@@ -77,7 +79,7 @@ def bump_size(w, m, sd, plot=False):
         y_rand = 2*np.random.rand(N)
         below = y_rand < shoulder_density(x_rand, w, m, sd)
         ax.scatter(x_rand[below], y_rand[below])
-        print "np.sum(below) = {}".format(np.sum(below))
+        print("np.sum(below) = {}".format(np.sum(below)))
         plt.show()
 
     xs = [x_break_left, x_valley, x_break_right]
@@ -104,10 +106,10 @@ if __name__ == '__main__':
         w = [0.8, 0.2]
         m = 0.9
         sd = 0.25
-        print "bump_size(w, m, sd) = {}".format(bump_size(w, m, sd))
+        print("bump_size(w, m, sd) = {}".format(bump_size(w, m, sd)))
 
         a = bump_distribution(0.005, w, sd)
-        print "bump_size(w, a, sd, True) = {}".format(bump_size(w, a, sd, True))
+        print("bump_size(w, a, sd, True) = {}".format(bump_size(w, a, sd, True)))
 
     if 0:
         shoulder_ratio = (16, 1)
@@ -115,10 +117,10 @@ if __name__ == '__main__':
         w /= np.sum(w)
         for s in [0.1, 0.25, 0.5, 1]:
             a_shoulder, x_shoulder = shoulder_distribution(w, s)
-            print "a_shoulder = {}".format(a_shoulder)
-            print "x_shoulder = {}".format(x_shoulder)
-            print "shoulder_derivative(x_shoulder, w, a, s) = {}".format(shoulder_derivative(x_shoulder, w, a_shoulder, s))
-            print "shoulder_derivative2(x_shoulder, w, a, s) = {}".format(shoulder_derivative2(x_shoulder, w, a_shoulder, s))
+            print("a_shoulder = {}".format(a_shoulder))
+            print("x_shoulder = {}".format(x_shoulder))
+            print("shoulder_derivative(x_shoulder, w, a, s) = {}".format(shoulder_derivative(x_shoulder, w, a_shoulder, s)))
+            print("shoulder_derivative2(x_shoulder, w, a, s) = {}".format(shoulder_derivative2(x_shoulder, w, a_shoulder, s)))
 
             x = np.linspace(-4, 4, 200)
             fig, axs = plt.subplots(1, 3, sharex=True, figsize=(16, 4))
@@ -136,7 +138,7 @@ if __name__ == '__main__':
         if latexplot:
             import matplotlib
             matplotlib.rc('text', usetex=True)
-            matplotlib.rcParams['text.latex.preamble'] = [r"\usepackage{amsmath}"]
+            matplotlib.rcParams['text.latex.preamble'] = ["\\usepackage\{amsmath\}"]
             matplotlib.rcParams['ps.useafm'] = True
             matplotlib.rcParams['pdf.use14corefonts'] = True
             matplotlib.rcParams['text.usetex'] = True
@@ -152,10 +154,10 @@ if __name__ == '__main__':
             ax_row[0].set_ylabel('$w_1\colon \! w_2 = {}\colon \!{}$'.format(*shoulder_ratio))
             for s, ax in zip(sds, ax_row):
                 a_shoulder, x_shoulder = shoulder_distribution(w, s)
-                print "a_shoulder = {}".format(a_shoulder)
-                print "x_shoulder = {}".format(x_shoulder)
-                print "shoulder_derivative(x_shoulder, w, a, s) = {}".format(shoulder_derivative(x_shoulder, w, a_shoulder, s))
-                print "shoulder_derivative2(x_shoulder, w, a, s) = {}".format(shoulder_derivative2(x_shoulder, w, a_shoulder, s))
+                print("a_shoulder = {}".format(a_shoulder))
+                print("x_shoulder = {}".format(x_shoulder))
+                print("shoulder_derivative(x_shoulder, w, a, s) = {}".format(shoulder_derivative(x_shoulder, w, a_shoulder, s)))
+                print("shoulder_derivative2(x_shoulder, w, a, s) = {}".format(shoulder_derivative2(x_shoulder, w, a_shoulder, s)))
 
                 x = np.linspace(-4, 4, 200)
                 ax.plot(x, shoulder_density(x, w, a_shoulder, s))
@@ -173,7 +175,7 @@ if __name__ == '__main__':
                     bbox_inches='tight')
         fig.savefig('/Users/johnsson/Dropbox/Modality/figs/shoulder_distributions.pdf', fmt='pdf',
                     bbox_inches='tight')
-        
+
         #plt.show()
 
     if 1:
@@ -182,7 +184,7 @@ if __name__ == '__main__':
         if latexplot:
             import matplotlib
             matplotlib.rc('text', usetex=True)
-            matplotlib.rcParams['text.latex.preamble'] = [r"\usepackage{amsmath}"]
+            matplotlib.rcParams['text.latex.preamble'] = ["\\usepackage\{amsmath\}"]
             matplotlib.rcParams['ps.useafm'] = True
             matplotlib.rcParams['pdf.use14corefonts'] = True
             matplotlib.rcParams['text.usetex'] = True
@@ -197,8 +199,8 @@ if __name__ == '__main__':
             ax_row[0].set_ylabel("$b = {}$".format(mtol))
             for sd, ax in zip(sds, ax_row):
                 a_bump = bump_distribution(mtol, w, sd)
-                print "a_bump = {}".format(a_bump)
-                print "bump_size(w, a_bump, sd) = {}".format(bump_size(w, a_bump, sd))
+                print("a_bump = {}".format(a_bump))
+                print("bump_size(w, a_bump, sd) = {}".format(bump_size(w, a_bump, sd)))
 
                 x = np.linspace(-4, 4, 200)
                 ax.plot(x, shoulder_density(x, w, a_bump, sd))

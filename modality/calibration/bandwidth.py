@@ -1,3 +1,5 @@
+from __future__ import unicode_literals
+from __future__ import print_function
 import matplotlib.pyplot as plt
 from mpi4py import MPI
 import numpy as np
@@ -226,12 +228,12 @@ def h_crit_scale_factor(alpha, null='normal', lower_lambda=0, upper_lambda=2.0,
 
 if __name__ == '__main__':
     if 0:
-        print "h_crit_scale_factor(0.30, 0, 2.0) = {}".format(h_crit_scale_factor(0.30, 0, 2.0))  # alpha=0.05 => lambda_alpha=1.12734985352
+        print("h_crit_scale_factor(0.30, 0, 2.0) = {}".format(h_crit_scale_factor(0.30, 0, 2.0)))  # alpha=0.05 => lambda_alpha=1.12734985352
 
     if 1:
 #        seed = np.random.randint(1000)
         seed = 851
-        print "seed = {}".format(seed)
+        print("seed = {}".format(seed))
         np.random.seed(seed)
         xsamp = XSampleShoulderBW(10000)
         x = np.linspace(-2, 2, 200)
@@ -240,7 +242,7 @@ if __name__ == '__main__':
         ax.axvline(-1.5)
         ax.axvline(1.5)
         kde_h = KernelDensity(kernel='gaussian', bandwidth=xsamp.h_crit*0.8).fit(xsamp.data.reshape(-1, 1))
-        print "is_unimodal_kde(xsamp.h_crit*0.8, xsamp.data, (-1.5, 1.5)) = {}".format(is_unimodal_kde(xsamp.h_crit*0.8, xsamp.data, (-1.5, 1.5)))
+        print("is_unimodal_kde(xsamp.h_crit*0.8, xsamp.data, (-1.5, 1.5)) = {}".format(is_unimodal_kde(xsamp.h_crit*0.8, xsamp.data, (-1.5, 1.5))))
         fig, ax = plt.subplots()
         ax.plot(x, np.exp(kde_h.score_samples(x.reshape(-1, 1))))
         ax.axvline(-1.5)

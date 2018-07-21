@@ -1,3 +1,5 @@
+from __future__ import unicode_literals
+from __future__ import print_function
 from mpi4py import MPI
 import numpy as np
 import matplotlib.pyplot as plt
@@ -189,7 +191,7 @@ if __name__ == '__main__':
     import time
     seed = 123  # 411
     rank = MPI.COMM_WORLD.Get_rank()
-    print "seed = {} at rank {}".format(seed+rank, rank)
+    print("seed = {} at rank {}".format(seed+rank, rank))
     np.random.seed(seed+rank)
     if 0:
         xdip = XSampleDip(1000, normalsamp)
@@ -200,17 +202,17 @@ if __name__ == '__main__':
             plt.plot(xF, yF)
             plt.show()
         if 0:
-            print "xdip.dip = {}".format(xdip.dip)
+            print("xdip.dip = {}".format(xdip.dip))
             for i in range(10):
-                print "xdip.dip_resampled() = {}".format(xdip.dip_resampled())
+                print("xdip.dip_resampled() = {}".format(xdip.dip_resampled()))
         if 0:
-            print "xdip.lowest_lambda_rejecting(0.05) = {}".format(xdip.lowest_lambda_rejecting(0.05))
+            print("xdip.lowest_lambda_rejecting(0.05) = {}".format(xdip.lowest_lambda_rejecting(0.05)))
     #print "dip_scale_factor(0.05) = {}".format(dip_scale_factor(0.05))
     alphas = np.arange(0.01, 0.99, 0.01)
     t0 = time.time()
     lambda_alphas = dip_scale_factor(alphas, normalsamp)
     t1 = time.time()
-    print "Time: {}".format(t1-t0)
+    print("Time: {}".format(t1-t0))
     for alpha, lambda_alpha in zip(alphas, lambda_alphas):
         save_lambda(lambda_alpha, 'dip', 'normal', alpha)
     #plt.plot(alphas, lambda_alphas)

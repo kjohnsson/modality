@@ -1,9 +1,11 @@
+from __future__ import unicode_literals
 '''
     Multidimensional test for multimodality, from
     Burman & Polonik 2009: Multivariate mode hunting: Data analytic
     tools with measures of significance. Journal of Multivariate
     Analysis 100 (2009).
 '''
+from __future__ import print_function
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas
@@ -102,9 +104,9 @@ def hotelling_pval(X, mu):
 
 if __name__ == '__main__':
     banknotes = pandas.read_csv('banknotes.csv')
-    print banknotes.shape
+    print(banknotes.shape)
     banknotes.head()
     plt.scatter(banknotes['Bottom'], banknotes['Diagonal'])
     data = np.hstack([banknotes['Bottom'].reshape(-1, 1), banknotes['Diagonal'].reshape(-1, 1)])
-    print pointwise_test(data)
+    print(pointwise_test(data))
 

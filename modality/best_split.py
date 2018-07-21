@@ -1,3 +1,4 @@
+from __future__ import unicode_literals
 import numpy as np
 from scipy.signal import argrelextrema
 from sklearn.neighbors import KernelDensity

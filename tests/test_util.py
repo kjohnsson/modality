@@ -1,3 +1,5 @@
+from __future__ import unicode_literals
+from __future__ import print_function
 import unittest
 import numpy as np
 from sklearn.neighbors import KernelDensity
@@ -28,7 +30,7 @@ class TestUtil(unittest.TestCase):
             #print "np.max(np.abs(y_apr-y_KD)) = {}".format(np.max(np.abs(y_apr-y_KD)))
             self.assertTrue(np.allclose(y_apr, y_KD, atol=1e-5))
 
-            print "Speedup for approx KDE vs. KernelDensity with {} data points: {}".format(N, (t2-t1)/(t1-t0))
+            print("Speedup for approx KDE vs. KernelDensity with {} data points: {}".format(N, (t2-t1)/(t1-t0)))
 
     def test_auto_interval(self):
         data = np.random.randn(1000)

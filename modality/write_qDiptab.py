@@ -1,7 +1,9 @@
+from __future__ import unicode_literals
 '''
     Importing table qDiptab from R package diptest and write to file
     qDiptab.
 '''
+from __future__ import print_function
 
 import os
 from rpy2 import robjects
@@ -26,7 +28,7 @@ def main():
     fname_diptab = robjects.StrVector(
         [os.path.join(qDiptab_dir, 'qDiptab.csv')])
     robjects.r('write.csv({}, {})'.format(qDiptab.r_repr(), fname_diptab.r_repr()))
-    print "Tabluated p-values loaded from R package diptest."
+    print("Tabluated p-values loaded from R package diptest.")
 
 if __name__ == '__main__':
     main()

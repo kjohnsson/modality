@@ -1,3 +1,4 @@
+from __future__ import unicode_literals
 from mpi4py import MPI
 import numpy as np
 from sklearn.neighbors import KernelDensity

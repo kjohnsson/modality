@@ -1,3 +1,4 @@
+from __future__ import unicode_literals
 import numpy as np
 
 from .resampling_tests import calibrated_diptest, calibrated_bwtest, silverman_bwtest

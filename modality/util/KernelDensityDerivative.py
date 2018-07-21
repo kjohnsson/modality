@@ -1,7 +1,9 @@
+from __future__ import unicode_literals
 '''
 Based on Bruce E. Hansen 2009: Lecture Notes on Nonparametrics,
 http://www.ssc.wisc.edu/~bhansen/718/NonParametrics1.pdf.
 '''
+from __future__ import print_function
 import numpy as np
 import matplotlib.pyplot as plt
 
@@ -61,8 +63,8 @@ def bandwidth_factor(nbr_data_pts, deriv_order=0):
 
 
 if __name__ == '__main__':
-    print "bandwidth_factor(1, 0) = {}".format(bandwidth_factor(1, 0))
-    print "bandwidth_factor(1, 2) = {}".format(bandwidth_factor(1, 2))
+    print("bandwidth_factor(1, 0) = {}".format(bandwidth_factor(1, 0)))
+    print("bandwidth_factor(1, 2) = {}".format(bandwidth_factor(1, 2)))
 
     data = np.random.randn(100)
     fig, axs = plt.subplots(1, 2)
