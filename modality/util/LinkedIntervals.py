@@ -1,5 +1,6 @@
 from __future__ import unicode_literals
 
+
 class LinkedList(object):
     def __init__(self, data=None):
         self._len = 0

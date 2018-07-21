@@ -1,16 +1,17 @@
 from __future__ import unicode_literals
 from __future__ import print_function
-from mpi4py import MPI
+
+import matplotlib.pyplot as plt
+# from mpi4py import MPI
 import numpy as np
 from scipy.signal import argrelextrema
+from scipy.stats import norm
 from scipy.optimize import minimize, leastsq
 from sklearn.neighbors import KernelDensity
-import matplotlib.pyplot as plt
-from scipy.stats import norm
 
 from .util.ApproxGaussianKDE import ApproxGaussianKDE as KDE
-from .util.bootstrap_MPI import bootstrap, check_equal_mpi
-from .util import MC_error_check
+# from .util.bootstrap_MPI import bootstrap, check_equal_mpi
+# from .util import MC_error_check
 from .util.GaussianMixture1d import GaussianMixture1d as GM
 
 

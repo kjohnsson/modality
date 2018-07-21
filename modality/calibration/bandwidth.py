@@ -1,5 +1,6 @@
 from __future__ import unicode_literals
 from __future__ import print_function
+
 import matplotlib.pyplot as plt
 from mpi4py import MPI
 import numpy as np

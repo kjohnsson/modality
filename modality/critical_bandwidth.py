@@ -1,14 +1,17 @@
 from __future__ import unicode_literals
 from __future__ import print_function
+
+import matplotlib.pyplot as plt
 import numpy as np
 from scipy.signal import argrelextrema
-import matplotlib.pyplot as plt
 
 from .util import ApproxGaussianKDE as KDE
 
 
 def critical_bandwidth(data, I=(-np.inf, np.inf), htol=1e-3):
-        # I is interval over which density is tested for unimodality
+    '''
+    I is interval over which density is tested for unimodality
+    '''
     hmax = (np.max(data)-np.min(data))/2.0
     return bisection_search_unimodal(0, hmax, htol, data, I)
 
@@ -21,14 +24,14 @@ def critical_bandwidth_m_modes(data, m, I=(-np.inf, np.inf), htol=1e-3):
 
 def bisection_search_unimodal(hmin, hmax, htol, data, I):
     '''
-        Assuming fun(xmax) < 0.
+    Assuming fun(xmax) < 0.
     '''
     return bisection_search_most_m_modes(hmin, hmax, htol, data, 1, I)
 
 
 def bisection_search_most_m_modes(hmin, hmax, htol, data, m, I):
     '''
-        Assuming fun(xmax) < 0.
+    Assuming fun(xmax) < 0.
     '''
     if hmax-hmin < htol:
         return (hmin + hmax)/2.0
@@ -74,7 +77,6 @@ def merge_into(z_new, z):
     return z_merged
 
 if __name__ == '__main__':
-
     from sklearn.neighbors import KernelDensity
 
     if 0:
@@ -123,7 +125,8 @@ if __name__ == '__main__':
         data = np.hstack([np.random.randn(N/2), np.random.randn(N/4)+3])
         if 1:
             I = (-1.5, 5.5)
-            print("pval_silverman(data, I) = {}".format(pval_silverman(data, I)))
+            print("pval_silverman(data, I) = "
+                  "{}".format(pval_silverman(data, I)))
             print("reject_null_calibrated_test_bandwidth(data, 0.05, 'normal', I) = {}".format(reject_null_calibrated_test_bandwidth(data, 0.05, 'normal', I)))
             print("reject_null_calibrated_test_bandwidth(data, 0.05, 'shoulder', I) = {}".format(reject_null_calibrated_test_bandwidth(data, 0.05, 'shoulder', I)))
 

@@ -1,10 +1,12 @@
 from __future__ import unicode_literals
 from __future__ import print_function
+
 from mpi4py import MPI
 import numpy as np
 from scipy.stats import binom
 
-from . import print_rank0, print_all_ranks
+from . import print_rank0
+# from . import print_all_ranks
 
 #comm = MPI.COMM_WORLD
 

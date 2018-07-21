@@ -1,5 +1,6 @@
 from __future__ import unicode_literals
 from __future__ import print_function
+
 from mpi4py import MPI
 
 
@@ -12,5 +13,6 @@ def print_rank0(comm, str):
         print(str)
 
 
-def print_all_ranks(comm, str):
-    print("Rank {}({}): ".format(comm.Get_rank(), MPI.COMM_WORLD.Get_rank())+str)
+def print_all_ranks(comm, msg):
+    print("Rank {}({}): ".format(comm.Get_rank(),
+          MPI.COMM_WORLD.Get_rank())+msg)

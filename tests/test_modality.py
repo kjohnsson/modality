@@ -1,11 +1,14 @@
 from __future__ import unicode_literals
 from __future__ import print_function
-import unittest
-import numpy as np
-import time
-from mpi4py import MPI
 
-from modality import calibrated_diptest, calibrated_bwtest, silverman_bwtest, hartigan_diptest, excess_mass_modes
+import time
+import unittest
+
+import numpy as np
+# from mpi4py import MPI
+
+from modality import calibrated_diptest, calibrated_bwtest, silverman_bwtest, \
+    hartigan_diptest, excess_mass_modes
 from modality.util import auto_interval
 
 
