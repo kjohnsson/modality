@@ -1,3 +1,4 @@
+import subprocess
 import sys
 import traceback
 
@@ -10,8 +11,7 @@ modality_data = ['data/gammaval.pkl']
 
 if 'install' in sys.argv or 'develop' in sys.argv:
     try:
-        from modality import write_qDiptab
-        write_qDiptab.main()
+        subprocess.check_output(['Rscript', 'write_qdiptab.R'])
         modality_data += ['data/qDiptab.csv']
         print("Tabluated p-values for Hartigan's diptest included.")
     except:
@@ -19,8 +19,7 @@ if 'install' in sys.argv or 'develop' in sys.argv:
         print("Tabulated p-values for Hartigan's diptest not loaded due to "
               "error. This means that p-values for Hartigan's "
               "(uncalibrated) diptest cannot be computed. Loading tabulated "
-              "p-values requires the R package 'diptest' as well as the "
-              "python module rpy2.")
+              "p-values requires R and the R package 'diptest'.")
 
 print(find_packages())
 setup(name='modality',
