@@ -9,9 +9,9 @@ import matplotlib.pyplot as plt
 import numpy as np
 import pandas
 
-
-qDiptab_file = os.path.join(os.path.join(
-    os.path.dirname(__file__), 'data'), 'qDiptab.csv')
+qDiptab_file = os.path.abspath(
+    os.path.join(os.path.dirname(__file__), 'data', 'qDiptab.csv')
+)
 
 if not os.path.exists(qDiptab_file):
     qDiptab_df = None
@@ -305,7 +305,7 @@ def dip_pval_tabinterpol(dip, N):
     N       -   number of observations
     '''
     if qDiptab_df is None:
-        raise DataError("Tabulated p-values not available, {} missing"
+        raise DataError("Tabulated p-values not available, {} missing. "
                         "See installation instructions.".format(qDiptab_file))
 
     if np.isnan(N) or N < 10:
