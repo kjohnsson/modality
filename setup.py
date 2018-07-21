@@ -4,7 +4,7 @@ import traceback
 from setuptools import setup, find_packages
 
 REQUIRED_PACKAGES = ['matplotlib', 'mpi4py', 'numpy', 'pandas',
-                     'scikit-learn', 'scipy', 'six']
+                     'scikit-learn', 'scipy', 'six', 'rpy2']
 
 modality_data = ['data/gammaval.pkl']
 
