@@ -1,14 +1,16 @@
-from __future__ import unicode_literals
 '''
     Multidimensional test for multimodality, from
     Burman & Polonik 2009: Multivariate mode hunting: Data analytic
     tools with measures of significance. Journal of Multivariate
     Analysis 100 (2009).
 '''
+from __future__ import unicode_literals
 from __future__ import print_function
+
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas
+
 from sklearn.neighbors import NearestNeighbors
 from scipy.stats import f, norm, chi2
 from scipy.special import gamma as gammafun

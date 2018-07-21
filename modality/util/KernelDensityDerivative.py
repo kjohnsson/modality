@@ -1,9 +1,10 @@
+'''
+    Based on Bruce E. Hansen 2009: Lecture Notes on Nonparametrics,
+    http://www.ssc.wisc.edu/~bhansen/718/NonParametrics1.pdf.
+'''
 from __future__ import unicode_literals
-'''
-Based on Bruce E. Hansen 2009: Lecture Notes on Nonparametrics,
-http://www.ssc.wisc.edu/~bhansen/718/NonParametrics1.pdf.
-'''
 from __future__ import print_function
+
 import numpy as np
 import matplotlib.pyplot as plt
 
