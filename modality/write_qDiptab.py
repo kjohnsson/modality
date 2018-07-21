@@ -1,11 +1,12 @@
-from __future__ import unicode_literals
 '''
     Importing table qDiptab from R package diptest and write to file
     qDiptab.
 '''
+from __future__ import unicode_literals
 from __future__ import print_function
 
 import os
+
 from rpy2 import robjects
 from rpy2.robjects.packages import importr, data
 from rpy2.rinterface import RRuntimeError

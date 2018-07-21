@@ -1,4 +1,3 @@
-from __future__ import unicode_literals
 import numpy as np
 
 from .resampling_tests import calibrated_diptest, calibrated_bwtest, silverman_bwtest
@@ -9,17 +8,17 @@ from .util import fp_blurring
 
 def flow_cytometry_interface(fun):
     """
-        Adds preprocessing of data to a function for testing for
-        unimodality. The new function will have additional keyword
-        arguments:
+    Adds preprocessing of data to a function for testing for
+    unimodality. The new function will have additional keyword
+    arguments:
 
-            ch_range    -   tuple with min and max value of channel
-            rm_extreme  -   should data at the maximum and minimum
-                            values be removed?
-            blurring    -   type of blurring: 'standard', 'fp',
-                            'fp_deterministic' or 'none'
-            blur_delta  -   discretization step for truncated data (float)
-                            or 'infer', which infers the step.
+        ch_range    -   tuple with min and max value of channel
+        rm_extreme  -   should data at the maximum and minimum
+                        values be removed?
+        blurring    -   type of blurring: 'standard', 'fp',
+                        'fp_deterministic' or 'none'
+        blur_delta  -   discretization step for truncated data (float)
+                        or 'infer', which infers the step.
     """
 
     def fun_with_fc_interface(*args, **kwargs):
@@ -47,7 +46,8 @@ def flow_cytometry_interface(fun):
             return fun(data, *args[1:], **kwargs)
         except TypeError as e:
             if "got multiple values for keyword argument 'I'" in str(e):
-                raise TypeError("'I' can only be given as keyword argument in flow cytometry interface.")
+                raise TypeError("'I' can only be given as keyword argument"
+                                "in flow cytometry interface.")
             if "got an unexpected keyword argument 'I'" in str(e):
                 del kwargs['I']
 
@@ -60,8 +60,9 @@ def infer_blur_delta(data):
     data = np.asarray(data)
     data_un = np.unique(data)
     if len(data_un) == len(data):
-        raise ValueError(
-            "Data is not detectably truncated, select 'blurring=none' or set 'blur_delta' to numerical value.")
+        raise ValueError("Data is not detectably truncated, select "
+                         "'blurring=none' or set 'blur_delta' to numerical "
+                         "value.")
     diffs = np.diff(np.sort(data_un))
     delta0 = np.min(diffs)
     return np.mean(diffs[diffs < 1.5*delta0])
@@ -70,16 +71,16 @@ def infer_blur_delta(data):
 def preprocess_fcdata(data, ch_range=None, rm_extreme=True, blurring='fp',
                       blur_delta='infer', return_list=False):
     """
-        Blur data as preprocessing for tests for unimodality.
-        Input:
+    Blur data as preprocessing for tests for unimodality.
+    Input:
 
-            data        -   data set
-            rm_extreme  -   should data at the maximum and minimum
-                            values be removed?
-            blurring    -   type of blurring: 'standard', 'fp',
-                            'fp_deterministic' or 'none'
-            blur_delta  -   discretization step for truncated data (float)
-                            or 'infer', which infers the step.
+        data        -   data set
+        rm_extreme  -   should data at the maximum and minimum
+                        values be removed?
+        blurring    -   type of blurring: 'standard', 'fp',
+                        'fp_deterministic' or 'none'
+        blur_delta  -   discretization step for truncated data (float)
+                        or 'infer', which infers the step.
     """
 
     data = np.asarray(data)

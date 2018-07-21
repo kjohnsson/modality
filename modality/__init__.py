@@ -11,4 +11,3 @@ __all__ = ['calibrated_diptest', 'calibrated_bwtest', 'silverman_bwtest',
            'calibrated_diptest_fc', 'calibrated_bwtest_fc',
            'silverman_bwtest_fc', 'hartigan_diptest_fc',
            'excess_mass_modes_fc', 'preprocess_fcdata', 'infer_blur_delta']
-__version__ = '1.1'
