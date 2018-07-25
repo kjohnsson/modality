@@ -4,14 +4,14 @@ from __future__ import print_function
 
 from collections import Counter
 import os
+import pkg_resources
 
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas
 
-qDiptab_file = os.path.abspath(
-    os.path.join(os.path.dirname(__file__), 'data', 'qDiptab.csv')
-)
+
+qDiptab_file = pkg_resources.resource_filename('modality', 'data/qDiptab.csv')
 
 if not os.path.exists(qDiptab_file):
     qDiptab_df = None

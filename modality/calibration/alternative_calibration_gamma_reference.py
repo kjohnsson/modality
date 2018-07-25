@@ -5,9 +5,9 @@ try:
     import cPickle as pickle
 except ImportError:
     import pickle
-import os
 
 import numpy as np
+import pkg_resources
 from scipy.special import beta as betafun
 
 
@@ -28,7 +28,6 @@ savedat = {'beta_betadistr': beta_betadistr,
            'beta_studentt': beta_studentt,
            'gamma_studentt': gamma_studentt(beta_studentt)}
 
-with open(os.path.join(os.path.join(os.path.join(os.path.join(
-          os.path.dirname(__file__), '..'), '..'), 'data'), 'gammaval.pkl'), 'w') as f:
+with open(pkg_resources.resource_filename('modality', 'data/gammaval.pkl'),
+          'w') as f:
     pickle.dump(savedat, f, -1)
-

@@ -5,22 +5,22 @@ try:
     import cPickle as pickle
 except ImportError:
     import pickle
-import os
 
 from mpi4py import MPI
 import numpy as np
+import pkg_resources
 
-lambda_dir = os.path.join(os.path.dirname(__file__), 'data')
-lambda_file_precomputed = os.path.join(lambda_dir, 'lambda_alphas.pkl')
+lambda_file_precomputed = \
+    pkg_resources.resource_filename('modality.calibration',
+                                    'data/lambda_alphas.pkl')
 
 
 def load_lambdas(test, null, alpha, lambda_file=None):
     if lambda_file is None:
         lambda_file = lambda_file_precomputed
     with open(lambda_file, 'rb') as f:
-         lambda_dict = pickle.load(f)
+        lambda_dict = pickle.load(f)
     return lambda_dict[test][null][alpha]
-
 
 
 def load_lambda(test, null, alpha, lambda_file=None):
