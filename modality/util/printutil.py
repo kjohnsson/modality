@@ -11,4 +11,4 @@ def print_rank0(comm, str):
 
 
 def print_all_ranks(comm, str):
-    print "Rank {}({}): ".format(comm.Get_rank(), MPI.COMM_WORLD.Get_rank())+str
+    print("Rank {}({}): ".format(comm.Get_rank(), MPI.COMM_WORLD.Get_rank())+str)
