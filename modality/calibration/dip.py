@@ -189,7 +189,7 @@ if __name__ == '__main__':
     import time
     seed = 123  # 411
     rank = MPI.COMM_WORLD.Get_rank()
-    print "seed = {} at rank {}".format(seed+rank, rank)
+    print("seed = {} at rank {}".format(seed+rank, rank))
     np.random.seed(seed+rank)
     if 0:
         xdip = XSampleDip(1000, normalsamp)
