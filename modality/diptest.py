@@ -156,7 +156,7 @@ def dip_and_closest_unimodal_from_cdf(xF, yF, plotting=False, verbose=False, eps
 
         if d <= D:
             if verbose:
-                print "Difference in modal interval smaller than current dip"
+                print("Difference in modal interval smaller than current dip")
             break
 
         # Find new modal interval so that largest difference is at endpoint
