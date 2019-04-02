@@ -71,13 +71,13 @@ if __name__ == '__main__':
     t3 = time.time()
 
     y_apr = y_apr_prop / kde._norm_factor
-    print "np.max(np.abs(y_apr-y_gkde)) = {}".format(np.max(np.abs(y_apr-y_gkde)))
-    print "np.max(np.abs(y_gkde-y_KD)) = {}".format(np.max(np.abs(y_gkde-y_KD)))
-    print "np.max(np.abs(y_apr-y_KD)) = {}".format(np.max(np.abs(y_apr-y_KD)))
+    print("np.max(np.abs(y_apr-y_gkde)) = {}".format(np.max(np.abs(y_apr-y_gkde))))
+    print("np.max(np.abs(y_gkde-y_KD)) = {}".format(np.max(np.abs(y_gkde-y_KD.))))
+    print("np.max(np.abs(y_apr-y_KD)) = {}".format(np.max(np.abs(y_apr-y_KD.))))
 
-    print "Time for approx: {}".format(t1-t0)  # approx ca 3-5 times faster for bandwidths close to critical
-    print "Time for gaussian_kde: {}".format(t2-t1)
-    print "Time for KernelDensity = {}".format(t3-t2)
+    print("Time for approx: {}".format(t1-t0))  # approx ca 3-5 times faster for bandwidths close to critical
+    print("Time for gaussian_kde: {}".format(t2-t1))
+    print("Time for KernelDensity = {}".format(t3-t2))
 
     import matplotlib.pyplot as plt
     plt.plot(x, y_apr)
