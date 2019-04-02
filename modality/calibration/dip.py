@@ -202,7 +202,7 @@ if __name__ == '__main__':
         if 0:
             print "xdip.dip = {}".format(xdip.dip)
             for i in range(10):
-                print "xdip.dip_resampled() = {}".format(xdip.dip_resampled())
+                print("xdip.dip_resampled() = {}".format(xdip.dip_resampled()))
         if 0:
             print "xdip.lowest_lambda_rejecting(0.05) = {}".format(xdip.lowest_lambda_rejecting(0.05))
     #print "dip_scale_factor(0.05) = {}".format(dip_scale_factor(0.05))
