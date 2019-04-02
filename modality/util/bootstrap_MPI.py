@@ -168,7 +168,7 @@ if __name__ == '__main__':
             return 0.01*np.abs(np.random.randn(1))+arg1+arg2
 
         N = 5
-        print "bootstrap(testfun, N, rank, size) = {}".format(bootstrap(testfun, N, np.float_, MPI.COMM_WORLD, rank, size))
+        print("bootstrap(testfun, N, rank, size) = {}".format(bootstrap(testfun, N, np.float_, MPI.COMM_WORLD, rank, size)))
 
     def testfun():
         alpha = 0.08
