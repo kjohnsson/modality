@@ -210,7 +210,7 @@ if __name__ == '__main__':
     t0 = time.time()
     lambda_alphas = dip_scale_factor(alphas, normalsamp)
     t1 = time.time()
-    print "Time: {}".format(t1-t0)
+    print("Time: {}".format(t1-t0))
     for alpha, lambda_alpha in zip(alphas, lambda_alphas):
         save_lambda(lambda_alpha, 'dip', 'normal', alpha)
     #plt.plot(alphas, lambda_alphas)
