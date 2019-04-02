@@ -200,7 +200,7 @@ if __name__ == '__main__':
             plt.plot(xF, yF)
             plt.show()
         if 0:
-            print "xdip.dip = {}".format(xdip.dip)
+            print("xdip.dip = {}".format(xdip.dip))
             for i in range(10):
                 print("xdip.dip_resampled() = {}".format(xdip.dip_resampled()))
         if 0:
