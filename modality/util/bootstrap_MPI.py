@@ -174,4 +174,4 @@ if __name__ == '__main__':
         alpha = 0.08
         return np.random.rand() < alpha
 
-    print "probability_in_interval(testfun, 0.07, 0.09) = {}".format(probability_in_interval(testfun, 0.07, 0.09))
+    print("probability_in_interval(testfun, 0.07, 0.09) = {}".format(probability_in_interval(testfun, 0.07, 0.09)))
