@@ -187,7 +187,7 @@ def dip_and_closest_unimodal_from_cdf(xF, yF, plotting=False, verbose=False, eps
 
         if xF[U0]-xF[L0] < eps:
             if verbose:
-                print "Modal interval zero length"
+                print("Modal interval zero length")
             break
 
         if plotting:
