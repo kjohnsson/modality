@@ -479,7 +479,7 @@ if __name__ == '__main__':
         if seed is None:
             dat = np.hstack([np.arange(0, 1, .1), np.arange(2, 3, 0.1)])
         else:
-            print "seed = {}".format(seed)
+            print("seed = {}".format(seed))
             np.random.seed(seed)
             dat = np.hstack([np.random.randn(10), np.random.randn(10)+2])
         xcum, ycum = cum_distr(dat, np.ones(len(dat))*1./len(dat))
