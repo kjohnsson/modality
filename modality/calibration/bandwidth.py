@@ -231,7 +231,7 @@ if __name__ == '__main__':
     if 1:
 #        seed = np.random.randint(1000)
         seed = 851
-        print "seed = {}".format(seed)
+        print("seed = {}".format(seed))
         np.random.seed(seed)
         xsamp = XSampleShoulderBW(10000)
         x = np.linspace(-2, 2, 200)
