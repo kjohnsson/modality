@@ -143,7 +143,7 @@ def mode_sizes_from_kde(kde, lamtol, mtol, I, xtol, debug=False):
                 mode_size = (kde.distr(x_right) - kde.distr(x_left) -
                              lambdas[li]/kde._norm_factor*(x_right-x_left))
                 if debug:
-                    print "mode_size {} = {}".format(i, mode_size)
+                    print("mode_size {} = {}".format(i, mode_size))
                 if mode_size > mtol:
                     big_enough[i] = True
                     mode_sizes[i] = mode_size
@@ -152,7 +152,7 @@ def mode_sizes_from_kde(kde, lamtol, mtol, I, xtol, debug=False):
 
             # Merging modes
             if debug:
-                print "Merging modes"
+                print("Merging modes")
             supermode_ind_start = np.arange(nbr_modes)
             supermode_ind_end = np.arange(nbr_modes)+1
             #lambda_ind = np.arange(nbr_modes)  # which lambdas is used for each supermode
