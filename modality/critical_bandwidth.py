@@ -138,7 +138,7 @@ if __name__ == '__main__':
         np.random.seed(seed)
         mtol = 0.001
         a = find_reference_distr(mtol)
-        print "a = {}".format(a)
+        print("a = {}".format(a))
         N = 2000
         data = np.hstack([np.random.randn(N/2), np.random.randn(N/4)+a])
         if 1:
