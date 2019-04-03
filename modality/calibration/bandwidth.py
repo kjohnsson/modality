@@ -240,7 +240,7 @@ if __name__ == '__main__':
         ax.axvline(-1.5)
         ax.axvline(1.5)
         kde_h = KernelDensity(kernel='gaussian', bandwidth=xsamp.h_crit*0.8).fit(xsamp.data.reshape(-1, 1))
-        print "is_unimodal_kde(xsamp.h_crit*0.8, xsamp.data, (-1.5, 1.5)) = {}".format(is_unimodal_kde(xsamp.h_crit*0.8, xsamp.data, (-1.5, 1.5)))
+        print("is_unimodal_kde(xsamp.h_crit*0.8, xsamp.data, (-1.5, 1.5)) = {}".format(is_unimodal_kde(xsamp.h_crit*0.8, xsamp.data, (-1.5, 1.5))))
         fig, ax = plt.subplots()
         ax.plot(x, np.exp(kde_h.score_samples(x.reshape(-1, 1))))
         ax.axvline(-1.5)
