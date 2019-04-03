@@ -126,7 +126,7 @@ if __name__ == '__main__':
             print("reject_null_calibrated_test_bandwidth(data, 0.05, 'shoulder', I) = {}".format(reject_null_calibrated_test_bandwidth(data, 0.05, 'shoulder', I)))
 
         x = np.linspace(-3, 8, 200)
-        print "x.shape = {}".format(x.shape)
+        print("x.shape = {}".format(x.shape))
         y = KernelDensity(kernel='gaussian', bandwidth=0.2).fit(data.reshape(-1, 1)).score_samples(x.reshape(-1, 1))
         plt.plot(x, np.exp(y))
         plt.show()
