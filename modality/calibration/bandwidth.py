@@ -226,7 +226,7 @@ def h_crit_scale_factor(alpha, null='normal', lower_lambda=0, upper_lambda=2.0,
 
 if __name__ == '__main__':
     if 0:
-        print("h_crit_scale_factor(0.30, 0, 2.0) = {}".format(h_crit_scale_factor(0.30, 0, 2.0))  # alpha=0.05 => lambda_alpha=1.12734985352)
+        print("h_crit_scale_factor(0.30, 0, 2.0) = {}".format(h_crit_scale_factor(0.30, 0, 2.0)))  # alpha=0.05 => lambda_alpha=1.12734985352
 
     if 1:
 #        seed = np.random.randint(1000)
