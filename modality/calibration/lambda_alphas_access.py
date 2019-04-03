@@ -77,12 +77,12 @@ def print_computed_calibration(lambda_file=None, include_dip_approx=False, comm=
     if comm.Get_rank() == 0:
         if lambda_file is None:
             lambda_file = lambda_file_precomputed
-        print "lambda_alpha in {}:".format(lambda_file)
-        print lambda_dict_to_csv(lambda_file)
+        print("lambda_alpha in {}:".format(lambda_file))
+        print(lambda_dict_to_csv(lambda_file))
 
         if include_dip_approx:
-            print "Approximate lambda_alpha in {}".format(lambda_file)
-            print lambda_dict_dip_approx_to_csv(lambda_file)
+            print("Approximate lambda_alpha in {}".format(lambda_file))
+            print(lambda_dict_dip_approx_to_csv(lambda_file))
 
 
 def lambda_dict_to_csv(lambda_file=None):
