@@ -69,8 +69,8 @@ def save_lambda(lambda_val, test, null, alpha, upper=None, lambda_file=None):
         with open(lambda_file, 'w') as f:
             pickle.dump(lambda_dict, f, -1)
 
-        print "Saved {} as {} bound for test {} with null hypothesis {} at alpha = {}".format(
-            lambda_val, 'upper' if upper else 'lower', test, null, alpha)
+        print("Saved {} as {} bound for test {} with null hypothesis {} at alpha = {}".format(
+            lambda_val, 'upper' if upper else 'lower', test, null, alpha))
 
 
 def print_computed_calibration(lambda_file=None, include_dip_approx=False, comm=MPI.COMM_WORLD):
