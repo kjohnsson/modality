@@ -158,8 +158,8 @@ def mode_sizes_from_kde(kde, lamtol, mtol, I, xtol, debug=False):
             #lambda_ind = np.arange(nbr_modes)  # which lambdas is used for each supermode
             for i in np.arange(nbr_modes)[~low_modes]:
                 if debug:
-                    print "i = {}".format(i)
-                    print "big_enough[i] = {}".format(big_enough[i])
+                    print("i = {}".format(i))
+                    print("big_enough[i] = {}".format(big_enough[i]))
                 start = supermode_ind_start[i]
                 end = supermode_ind_end[i]
                 while not big_enough[i]:
@@ -171,7 +171,7 @@ def mode_sizes_from_kde(kde, lamtol, mtol, I, xtol, debug=False):
                         break  # isolated mode -- merger not allowed to left or right
                     merge_to_left = (start > 0) and lambdas[start] > lambdas[end]
                     if debug:
-                        print "merge_to_left = {}".format(merge_to_left)
+                        print("merge_to_left = {}".format(merge_to_left))
                     if merge_to_left or big_enough[end]:
                         break  # merger will not increase number of modes
                     end += 1
@@ -185,10 +185,10 @@ def mode_sizes_from_kde(kde, lamtol, mtol, I, xtol, debug=False):
                     supermode_size = (kde.distr(x_right) - kde.distr(x_left) -
                                       lambd/kde._norm_factor*(x_right-x_left))
                     if debug:
-                        print "supermode_size = {}".format(supermode_size)
-                        print "(start, end) = {}".format((start, end))
-                        print "(x_left, x_right) = {}".format((x_left, x_right))
-                        print "li = {}".format(li)
+                        print("supermode_size = {}".format(supermode_size))
+                        print("(start, end) = {}".format((start, end)))
+                        print("(x_left, x_right) = {}".format((x_left, x_right)))
+                        print("li = {}".format(li))
                     if supermode_size > mtol:
                         big_enough[i] = True
                         mode_sizes[i] = supermode_size
@@ -197,7 +197,7 @@ def mode_sizes_from_kde(kde, lamtol, mtol, I, xtol, debug=False):
                                 big_enough[j] = False
                         if np.sum(big_enough) > 1:
                             if debug:
-                                print "(start, end) = {}".format((start, end))
+                                print("(start, end) = {}".format((start, end)))
                                 axs[1].plot([x_left, x_right], [lambd/kde._norm_factor]*2)
                             return mode_sizes[mode_sizes > 0]
 
@@ -298,15 +298,15 @@ if __name__ == '__main__':
         #print "is_unimodal_kde(h, data) = {}".format(is_unimodal_kde(h, data))
         #plt.show()
         t0 = time.time()
-        print "fisher_marron_critical_bandwidth(data, lamtol, mtol) = {}".format(fisher_marron_critical_bandwidth(data, lamtol, mtol))
+        print("fisher_marron_critical_bandwidth(data, lamtol, mtol) = {}".format(fisher_marron_critical_bandwidth(data, lamtol, mtol)))
         t1 = time.time()
-        print "bandwidth_pval(data, lamtol, mtol) = {}".format(bandwidth_test_pval(data, lamtol, mtol, 1000))
+        print("bandwidth_pval(data, lamtol, mtol) = {}".format(bandwidth_test_pval(data, lamtol, mtol, 1000)))
         t2 = time.time()
-        print "bandwidth_pval_mpi(data, lamtol, mtol) = {}".format(bandwidth_test_pval_mpi(data, lamtol, mtol, 1000))
+        print("bandwidth_pval_mpi(data, lamtol, mtol) = {}".format(bandwidth_test_pval_mpi(data, lamtol, mtol, 1000)))
         t3 = time.time()
-        print "Critical bandwidth computation time: {}".format(t1-t0)
-        print "Pval computation time: {}".format(t2-t1)
-        print "Pval computation time (mpi) = {}".format(t3-t2)
+        print("Critical bandwidth computation time: {}".format(t1-t0))
+        print("Pval computation time: {}".format(t2-t1))
+        print("Pval computation time (mpi) = {}".format(t3-t2))
 
     if 0:
         import time
