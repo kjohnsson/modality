@@ -207,9 +207,9 @@ def mode_sizes_from_kde(kde, lamtol, mtol, I, xtol, debug=False):
                 x_left = x[left_boundaries[start, li]]
                 x_right = x[right_boundaries[end-1, li]]
                 if debug:
-                    print "(x_left, x_right) = {}".format((x_left, x_right))
-                    print "li = {}".format(li)
-                    print "(start, end) = {}".format((start, end))
+                    print("(x_left, x_right) = {}".format((x_left, x_right)))
+                    print("li = {}".format(li))
+                    print("(start, end) = {}".format((start, end)))
                     lambd = lambdas[li]
                     axs[1].plot([x_left, x_right], [lambd/kde._norm_factor]*2)
 
@@ -314,29 +314,29 @@ if __name__ == '__main__':
         data = np.hstack([np.random.randn(N/2), np.random.randn(N/2)])
         lamtol, mtol = 0.01, 0.01
         t0 = time.time()
-        print "bandwidth_pval_mpi(data, lamtol, mtol) = {}".format(bandwidth_test_pval_mpi(data, lamtol, mtol, 10000))
+        print("bandwidth_pval_mpi(data, lamtol, mtol) = {}".format(bandwidth_test_pval_mpi(data, lamtol, mtol, 10000)))
         t1 = time.time()
-        print "Time: {}".format(t1-t0)
+        print("Time: {}".format(t1-t0))
 
     if 0:
         data = np.random.randn(1000)
         h = .5
-        print "np.std(data) = {}".format(np.std(data))
+        print("np.std(data) = {}".format(np.std(data)))
         resamp = KernelDensity(kernel='gaussian', bandwidth=h).fit(data).sample(1000)/np.sqrt((1+h**2/np.var(data)))
-        print "np.std(resamp) = {}".format(np.std(resamp))
+        print("np.std(resamp) = {}".format(np.std(resamp)))
 
     if 0:
         seed = np.random.randint(0, 1000)
-        print "seed = {}".format(seed)  # 37, 210, 76, 492, 229
+        print("seed = {}".format(seed))  # 37, 210, 76, 492, 229)
         #seed = 417 #229
         np.random.seed(seed)
         data = np.hstack([np.random.randn(500), np.random.randn(100)+3])
         #data = np.random.randn(1000)
-        print "data.shape = {}".format(data.shape)
+        print("data.shape = {}".format(data.shape))
         h = .2
         lamtol = 0.01
         mtol = 0.01
-        print "is_unimodal_kde(h, data, lamtol, mtol) = {}".format(is_unimodal_kde(h, data, lamtol, mtol, debug=False))
+        print("is_unimodal_kde(h, data, lamtol, mtol) = {}".format(is_unimodal_kde(h, data, lamtol, mtol, debug=False)))
         plt.show()
 
     if 0:
@@ -362,8 +362,8 @@ if __name__ == '__main__':
             y = w1*np.exp(-x**2/2) + w2*np.exp(-(x-a)**2/2)
             plt.plot(x, y)
             data = np.repeat([0, a], shoulder_ratio)
-            print "data = {}".format(data)
-            print "mode_sizes_kde(1, data, 0, mtol/2, I) = {}".format(mode_sizes_kde(1, data, 0, mtol/2, I))
+            print("data = {}".format(data))
+            print("mode_sizes_kde(1, data, 0, mtol/2, I) = {}".format(mode_sizes_kde(1, data, 0, mtol/2, I)))
         plt.show()
 
 

@@ -128,7 +128,7 @@ def Delta_Nn_best_lambda_in_unimodal(data, w, n, plotting=False):
         if D > D_max:
             D_max = D
             best_modes = modes
-    print "D_max - 2*dip= {}".format(D_max-2*dip)  # should be zero
+    print("D_max - 2*dip= {}".format(D_max-2*dip))  # should be zero
     return best_modes
 
 
@@ -158,7 +158,7 @@ def Delta_Nn_brute_search(data, w, n):
         if D > D_max:
             D_max = D
             best_modes = modes
-    print "D_max - 2*dip = {}".format(D_max-2*dip)
+    print("D_max - 2*dip = {}".format(D_max-2*dip))
     return best_modes
 
 

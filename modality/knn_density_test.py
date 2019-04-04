@@ -103,9 +103,9 @@ def hotelling_pval(X, mu):
 
 if __name__ == '__main__':
     banknotes = pandas.read_csv('banknotes.csv')
-    print banknotes.shape
+    print(banknotes.shape)
     banknotes.head()
     plt.scatter(banknotes['Bottom'], banknotes['Diagonal'])
     data = np.hstack([banknotes['Bottom'].reshape(-1, 1), banknotes['Diagonal'].reshape(-1, 1)])
-    print pointwise_test(data)
+    print(pointwise_test(data))
 
