@@ -21,7 +21,7 @@ def shoulder_derivative2(x, w, m, s):
 def shoulder_cdf(x, w, m, s):
     return w[0]*norm.cdf(x) + w[1]*norm.cdf(x, m, s)
 
-
+'''
 def shoulder_distribution(w, sd):
     a0 = 0.1
     maxiter = 30
@@ -38,7 +38,7 @@ def shoulder_distribution(w, sd):
             return a_shoulder, x_shoulder
         a0 += 0.1
         i += 1
-
+'''
 
 def bump_size(w, m, sd, plot=False):
     x0s = np.linspace(0, m, 10)
