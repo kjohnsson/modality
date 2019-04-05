@@ -2,7 +2,7 @@ import re
 
 
 def summarize_log(logfile, interval_search=True):
-    print "logfile = {}".format(logfile)
+    print("logfile = {}".format(logfile))
 
     with open(logfile, 'r') as f:
         lines = f.readlines()
@@ -15,9 +15,9 @@ def summarize_log(logfile, interval_search=True):
             break
 
     try:
-        print "Test: {}, null hypthesis: {}, at alpha={}".format(test, null, alpha)
+        print("Test: {}, null hypthesis: {}, at alpha={}".format(test, null, alpha))
     except:
-        print "Test not found."
+        print("Test not found.")
         return
 
     val = 0
@@ -66,8 +66,8 @@ def summarize_log(logfile, interval_search=True):
 
         if i > 0:
             if not bound_found:
-                print "Not able to decide for bound {} after {} tests (mean val: {}, max samp reached: {}, nbr additional tests: {})".format(val, nbr_tests, mean_val, max_samp_reached, ntests)
+                print("Not able to decide for bound {} after {} tests (mean val: {}, max samp reached: {}, nbr additional tests: {})".format(val, nbr_tests, mean_val, max_samp_reached, ntests))
             else:
-                print "Decided for {} bound {} after {} tests (mean val: {}, max samp reached: {})".format(bound_type, val, nbr_tests, mean_val, max_samp_reached)
+                print("Decided for {} bound {} after {} tests (mean val: {}, max samp reached: {})".format(bound_type, val, nbr_tests, mean_val, max_samp_reached))
 
-    print '-'*50
+    print('-'*50)

@@ -105,5 +105,5 @@ if __name__ == '__main__':
         t0 = time.time()
         pval = calibrated_dip_test(data)
         t1 = time.time()
-        print "pval = {}".format(pval)
-        print "Time consumption calibrated dip test: {}".format(t1-t0)
+        print("pval = {}".format(pval))
+        print("Time consumption calibrated dip test: {}".format(t1-t0))

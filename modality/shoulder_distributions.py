@@ -18,7 +18,7 @@ def shoulder_derivative2(x, w, m, s):
 def shoulder_cdf(x, w, m, s):
     return w[0]*norm.cdf(x) + w[1]*norm.cdf(x, m, s)
 
-
+'''
 def shoulder_distribution(w, sd):
     a0 = 0.1
     maxiter = 30
@@ -35,7 +35,7 @@ def shoulder_distribution(w, sd):
             return a_shoulder, x_shoulder
         a0 += 0.1
         i += 1
-
+'''
 
 def bump_size(w, m, sd, plot=False):
     x0s = np.linspace(0, m, 10)
@@ -77,7 +77,7 @@ def bump_size(w, m, sd, plot=False):
         y_rand = 2*np.random.rand(N)
         below = y_rand < shoulder_density(x_rand, w, m, sd)
         ax.scatter(x_rand[below], y_rand[below])
-        print "np.sum(below) = {}".format(np.sum(below))
+        print("np.sum(below) = {}".format(np.sum(below)))
         plt.show()
 
     xs = [x_break_left, x_valley, x_break_right]
@@ -104,10 +104,10 @@ if __name__ == '__main__':
         w = [0.8, 0.2]
         m = 0.9
         sd = 0.25
-        print "bump_size(w, m, sd) = {}".format(bump_size(w, m, sd))
+        print("bump_size(w, m, sd) = {}".format(bump_size(w, m, sd)))
 
         a = bump_distribution(0.005, w, sd)
-        print "bump_size(w, a, sd, True) = {}".format(bump_size(w, a, sd, True))
+        print("bump_size(w, a, sd, True) = {}".format(bump_size(w, a, sd, True)))
 
     if 0:
         shoulder_ratio = (16, 1)
@@ -115,10 +115,10 @@ if __name__ == '__main__':
         w /= np.sum(w)
         for s in [0.1, 0.25, 0.5, 1]:
             a_shoulder, x_shoulder = shoulder_distribution(w, s)
-            print "a_shoulder = {}".format(a_shoulder)
-            print "x_shoulder = {}".format(x_shoulder)
-            print "shoulder_derivative(x_shoulder, w, a, s) = {}".format(shoulder_derivative(x_shoulder, w, a_shoulder, s))
-            print "shoulder_derivative2(x_shoulder, w, a, s) = {}".format(shoulder_derivative2(x_shoulder, w, a_shoulder, s))
+            print("a_shoulder = {}".format(a_shoulder))
+            print("x_shoulder = {}".format(x_shoulder))
+            print("shoulder_derivative(x_shoulder, w, a, s) = {}".format(shoulder_derivative(x_shoulder, w, a_shoulder, s)))
+            print("shoulder_derivative2(x_shoulder, w, a, s) = {}".format(shoulder_derivative2(x_shoulder, w, a_shoulder, s)))
 
             x = np.linspace(-4, 4, 200)
             fig, axs = plt.subplots(1, 3, sharex=True, figsize=(16, 4))
@@ -152,10 +152,10 @@ if __name__ == '__main__':
             ax_row[0].set_ylabel('$w_1\colon \! w_2 = {}\colon \!{}$'.format(*shoulder_ratio))
             for s, ax in zip(sds, ax_row):
                 a_shoulder, x_shoulder = shoulder_distribution(w, s)
-                print "a_shoulder = {}".format(a_shoulder)
-                print "x_shoulder = {}".format(x_shoulder)
-                print "shoulder_derivative(x_shoulder, w, a, s) = {}".format(shoulder_derivative(x_shoulder, w, a_shoulder, s))
-                print "shoulder_derivative2(x_shoulder, w, a, s) = {}".format(shoulder_derivative2(x_shoulder, w, a_shoulder, s))
+                print("a_shoulder = {}".format(a_shoulder))
+                print("x_shoulder = {}".format(x_shoulder))
+                print("shoulder_derivative(x_shoulder, w, a, s) = {}".format(shoulder_derivative(x_shoulder, w, a_shoulder, s)))
+                print("shoulder_derivative2(x_shoulder, w, a, s) = {}".format(shoulder_derivative2(x_shoulder, w, a_shoulder, s)))
 
                 x = np.linspace(-4, 4, 200)
                 ax.plot(x, shoulder_density(x, w, a_shoulder, s))
@@ -197,8 +197,8 @@ if __name__ == '__main__':
             ax_row[0].set_ylabel("$b = {}$".format(mtol))
             for sd, ax in zip(sds, ax_row):
                 a_bump = bump_distribution(mtol, w, sd)
-                print "a_bump = {}".format(a_bump)
-                print "bump_size(w, a_bump, sd) = {}".format(bump_size(w, a_bump, sd))
+                print("a_bump = {}".format(a_bump))
+                print("bump_size(w, a_bump, sd) = {}".format(bump_size(w, a_bump, sd)))
 
                 x = np.linspace(-4, 4, 200)
                 ax.plot(x, shoulder_density(x, w, a_bump, sd))

@@ -62,8 +62,8 @@ def bandwidth_factor(nbr_data_pts, deriv_order=0):
 
 
 if __name__ == '__main__':
-    print "bandwidth_factor(1, 0) = {}".format(bandwidth_factor(1, 0))
-    print "bandwidth_factor(1, 2) = {}".format(bandwidth_factor(1, 2))
+    print("bandwidth_factor(1, 0) = {}".format(bandwidth_factor(1, 0)))
+    print("bandwidth_factor(1, 2) = {}".format(bandwidth_factor(1, 2)))
 
     data = np.random.randn(100)
     fig, axs = plt.subplots(1, 2)
