@@ -10,9 +10,9 @@ Added flow cytometry interface, for integrated preprocessing of flow
 cytometry data. See tests/test_fc_interface.py
 
 ### References
-K. Johnsson and M. Fontes (2016): What is a `unimodal' cell
-population? Using statistical tests as criteria for unimodality in
-automated gating and quality control (manuscript).
+K. Johnsson and M. Fontes (2017): What is a “unimodal” cell population? 
+Using statistical tests as criteria for unimodality in automated gating 
+and quality control. Cytometry, 91. doi:10.1002/cyto.a.23173
 
 Hartigan and Hartigan (1985): The dip test of unimodality.
 The Annals of Statistics. 13(1).
@@ -61,17 +61,17 @@ Some basic usage is showcased in the file tests/test_R.R.
 
 ## Dependencies
 The package has the following dependencies:
-- Python 2.7, including packages scipy, numpy (>= 1.11), matplotlib, mpi4py, (rpy2), scikit-learn
+- Python 2.7 or Python 3.6, as well as packages listed in setup.py.
 - OpenMPI
 
 rpy2 is necessary for the uncalibrated version of Hartigan's dip test,
 as well as R and the R package diptest (see Installation).
 
 ### Ubuntu
-Python, OpenMPI and the required Python packages can be installed by:
+OpenMPI can be installed by:
 ```
-sudo apt-get install python, openmpi  
-sudo pip install numpy, scipy, matplotlib, mpi4py, rpy2, sklearn
+sudo apt-get update
+sudo apt-get install -y libopenmpi-dev openmpi-bin
 ```
 
 ### Mac
@@ -81,10 +81,6 @@ Then install Python and OpenMPI:
 ```
 brew install python, openmpi
 ```
-Then Python packages can be installed using
-```
-pip install numpy, scipy, matplotlib, mpi4py, rpy2, sklearn
-```
 
 ## Installation
 Download modality-1.1.tar.gz at
@@ -93,7 +89,7 @@ https://github.com/kjohnsson/modality/blob/master/dist/modality-1.1.tar.gz
 
 and unpack it. In the terminal, go to the extracted directory modality-1.1 and write
 ```
-python setup.py install
+pip install .
 ```
 If installation for only one user is wanted, you can add the option
 `--user`.

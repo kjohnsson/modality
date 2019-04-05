@@ -1,3 +1,4 @@
+from __future__ import unicode_literals
 from .MC_error_check import MC_error_check
 from .printutil import print_all_ranks, print_rank0
 from .auto_interval import auto_interval, get_I

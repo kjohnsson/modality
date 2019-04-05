@@ -1,19 +1,25 @@
-import pickle
-import numpy as np
-import os
+from __future__ import unicode_literals
+from __future__ import print_function
+
+try:
+    import cPickle as pickle
+except ImportError:
+    import pickle
+
 from mpi4py import MPI
+import numpy as np
+import pkg_resources
 
-
-lambda_dir = os.path.join(os.path.dirname(__file__), 'data')
-lambda_file_precomputed = os.path.join(lambda_dir, 'lambda_alphas.pkl')
+lambda_file_precomputed = \
+    pkg_resources.resource_filename('modality.calibration',
+                                    'data/lambda_alphas.pkl')
 
 
 def load_lambdas(test, null, alpha, lambda_file=None):
     if lambda_file is None:
         lambda_file = lambda_file_precomputed
-    with open(lambda_file, 'r') as f:
+    with open(lambda_file, 'rb') as f:
         lambda_dict = pickle.load(f)
-
     return lambda_dict[test][null][alpha]
 
 
@@ -45,7 +51,7 @@ def save_lambda(lambda_val, test, null, alpha, upper=None, lambda_file=None):
     if MPI.COMM_WORLD.Get_rank() == 0:
 
         try:
-            with open(lambda_file, 'r') as f:
+            with open(lambda_file, 'rb') as f:
                 lambda_dict = pickle.load(f)
         except (IOError, EOFError):
             lambda_dict = {}
@@ -66,7 +72,7 @@ def save_lambda(lambda_val, test, null, alpha, upper=None, lambda_file=None):
         else:
             raise ValueError('Unknown test: {}'.format(test))
 
-        with open(lambda_file, 'w') as f:
+        with open(lambda_file, 'wb') as f:
             pickle.dump(lambda_dict, f, -1)
 
         print("Saved {} as {} bound for test {} with null hypothesis {} at alpha = {}".format(
@@ -88,7 +94,7 @@ def print_computed_calibration(lambda_file=None, include_dip_approx=False, comm=
 def lambda_dict_to_csv(lambda_file=None):
     if lambda_file is None:
         lambda_file = lambda_file_precomputed
-    with open(lambda_file, 'r') as f:
+    with open(lambda_file, 'rb') as f:
         lambda_dict = pickle.load(f)
 
     csv_str = 'Test, Null hypothesis, alpha, Lower bound, Upper bound\n'

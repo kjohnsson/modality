@@ -1,3 +1,4 @@
+from __future__ import unicode_literals
 import numpy as np
 from scipy.signal import argrelextrema
 from sklearn.neighbors import KernelDensity
@@ -6,9 +7,7 @@ from .critical_bandwidth import critical_bandwidth_m_modes
 
 
 def best_split(data, I=(-np.inf, np.inf)):
-    '''
-        With bimodal data, finding split at lowest density.
-    '''
+    '''With bimodal data, finding split at lowest density.'''
     h_crit = critical_bandwidth_m_modes(data, 2, I)
     kde = KernelDensity(kernel='gaussian', bandwidth=h_crit).fit(data.reshape(-1, 1))
     x = np.linspace(max(np.min(data), I[0]), min(np.max(data), I[1]), 200)

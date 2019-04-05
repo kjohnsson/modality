@@ -1,13 +1,17 @@
+from __future__ import unicode_literals
 from __future__ import division
+from __future__ import print_function
+
 from collections import Counter
+import os
+import pkg_resources
+
 import matplotlib.pyplot as plt
 import numpy as np
-import os
 import pandas
 
 
-qDiptab_file = os.path.join(os.path.join(
-    os.path.dirname(__file__), 'data'), 'qDiptab.csv')
+qDiptab_file = pkg_resources.resource_filename('modality', 'data/qDiptab.csv')
 
 if not os.path.exists(qDiptab_file):
     qDiptab_df = None
@@ -21,20 +25,20 @@ class DataError(Exception):
 
 def hartigan_diptest(data):
     '''
-        P-value according to Hartigan's dip test for unimodality.
-        The dip is computed using the function
-        dip_and_closest_unimodal_from_cdf. From this the p-value is
-        interpolated using a table imported from the R package diptest.
+    P-value according to Hartigan's dip test for unimodality.
+    The dip is computed using the function
+    dip_and_closest_unimodal_from_cdf. From this the p-value is
+    interpolated using a table imported from the R package diptest.
 
-        References:
-            Hartigan and Hartigan (1985): The dip test of unimodality.
-            The Annals of Statistics. 13(1).
+    References:
+        Hartigan and Hartigan (1985): The dip test of unimodality.
+        The Annals of Statistics. 13(1).
 
-        Input:
-            data    -   one-dimensional data set.
+    Input:
+        data    -   one-dimensional data set.
 
-        Value:
-            p-value for the test.
+    Value:
+        p-value for the test.
     '''
     return pval_hartigan(data)
 
@@ -73,19 +77,19 @@ def dip_from_cdf(xF, yF, plotting=False, verbose=False, eps=1e-12):
 
 def dip_and_closest_unimodal_from_cdf(xF, yF, plotting=False, verbose=False, eps=1e-12):
     '''
-        Dip computed as distance between empirical distribution function (EDF) and
-        cumulative distribution function for the unimodal distribution with
-        smallest such distance. The optimal unimodal distribution is found by
-        the algorithm presented in
+    Dip computed as distance between empirical distribution function (EDF) and
+    cumulative distribution function for the unimodal distribution with
+    smallest such distance. The optimal unimodal distribution is found by
+    the algorithm presented in
 
-            Hartigan (1985): Computation of the dip statistic to test for
-            unimodaliy. Applied Statistics, vol. 34, no. 3
+        Hartigan (1985): Computation of the dip statistic to test for
+        unimodaliy. Applied Statistics, vol. 34, no. 3
 
-        If the plotting option is enabled the optimal unimodal distribution
-        function is plotted along with (xF, yF-dip) and (xF, yF+dip)
+    If the plotting option is enabled the optimal unimodal distribution
+    function is plotted along with (xF, yF-dip) and (xF, yF+dip)
 
-        xF  -   x-coordinates for EDF
-        yF  -   y-coordinates for EDF
+    xF  -   x-coordinates for EDF
+    yF  -   y-coordinates for EDF
 
     '''
 
@@ -297,12 +301,12 @@ def dip_and_closest_unimodal_from_cdf(xF, yF, plotting=False, verbose=False, eps
 
 def dip_pval_tabinterpol(dip, N):
     '''
-        dip     -   dip value computed from dip_from_cdf
-        N       -   number of observations
+    dip     -   dip value computed from dip_from_cdf
+    N       -   number of observations
     '''
-
     if qDiptab_df is None:
-        raise DataError("Tabulated p-values not available. See installation instructions.")
+        raise DataError("Tabulated p-values not available, {} missing. "
+                        "See installation instructions.".format(qDiptab_file))
 
     if np.isnan(N) or N < 10:
         return np.nan

@@ -1,5 +1,8 @@
-import numpy as np
+from __future__ import unicode_literals
+from __future__ import print_function
+
 import matplotlib.pyplot as plt
+import numpy as np
 
 from .diptest import dip_and_closest_unimodal_from_cdf, cum_distr
 from .util.LinkedIntervals import LinkedIntervals

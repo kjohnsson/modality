@@ -109,5 +109,7 @@ TODO.txt
 dev_tests/
 logs/
 obsolete/
-src/calibration/data/obsolete/
-src/data/qDiptab.csv
+modality/calibration/data/obsolete/
+modality/data/qDiptab.csv
+
+*.bak

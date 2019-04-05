@@ -1,3 +1,6 @@
+from __future__ import unicode_literals
+from __future__ import print_function
+
 import numpy as np
 from scipy.optimize import leastsq
 from scipy.stats import norm
@@ -25,7 +28,7 @@ def shoulder_distribution(w, sd):
     i = 0
     while i < maxiter:
         x0 = a0 if a0 > 1 else 0
-        res = leastsq(lambda (x, a): [shoulder_derivative(x, w, a, sd), shoulder_derivative2(x, w, a, sd)], x0=(x0, a0))
+        res = leastsq(lambda x, a: [shoulder_derivative(x, w, a, sd), shoulder_derivative2(x, w, a, sd)], x0=(x0, a0))
         x_a = res[0]
         x_shoulder = x_a[0]
         a_shoulder = x_a[1]
@@ -136,7 +139,7 @@ if __name__ == '__main__':
         if latexplot:
             import matplotlib
             matplotlib.rc('text', usetex=True)
-            matplotlib.rcParams['text.latex.preamble'] = [r"\usepackage{amsmath}"]
+            matplotlib.rcParams['text.latex.preamble'] = ["\\usepackage\{amsmath\}"]
             matplotlib.rcParams['ps.useafm'] = True
             matplotlib.rcParams['pdf.use14corefonts'] = True
             matplotlib.rcParams['text.usetex'] = True
@@ -173,7 +176,7 @@ if __name__ == '__main__':
                     bbox_inches='tight')
         fig.savefig('/Users/johnsson/Dropbox/Modality/figs/shoulder_distributions.pdf', fmt='pdf',
                     bbox_inches='tight')
-        
+
         #plt.show()
 
     if 1:
@@ -182,7 +185,7 @@ if __name__ == '__main__':
         if latexplot:
             import matplotlib
             matplotlib.rc('text', usetex=True)
-            matplotlib.rcParams['text.latex.preamble'] = [r"\usepackage{amsmath}"]
+            matplotlib.rcParams['text.latex.preamble'] = ["\\usepackage\{amsmath\}"]
             matplotlib.rcParams['ps.useafm'] = True
             matplotlib.rcParams['pdf.use14corefonts'] = True
             matplotlib.rcParams['text.usetex'] = True

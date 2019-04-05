@@ -1,14 +1,17 @@
-from mpi4py import MPI
+from __future__ import unicode_literals
+from __future__ import print_function
+
+import matplotlib.pyplot as plt
+# from mpi4py import MPI
 import numpy as np
 from scipy.signal import argrelextrema
+from scipy.stats import norm
 from scipy.optimize import minimize, leastsq
 from sklearn.neighbors import KernelDensity
-import matplotlib.pyplot as plt
-from scipy.stats import norm
 
 from .util.ApproxGaussianKDE import ApproxGaussianKDE as KDE
-from .util.bootstrap_MPI import bootstrap, check_equal_mpi
-from .util import MC_error_check
+# from .util.bootstrap_MPI import bootstrap, check_equal_mpi
+# from .util import MC_error_check
 from .util.GaussianMixture1d import GaussianMixture1d as GM
 
 
@@ -327,7 +330,7 @@ if __name__ == '__main__':
 
     if 0:
         seed = np.random.randint(0, 1000)
-        print("seed = {}".format(seed))  # 37, 210, 76, 492, 229)
+        print("seed = {}".format(seed))  # 37, 210, 76, 492, 229
         #seed = 417 #229
         np.random.seed(seed)
         data = np.hstack([np.random.randn(500), np.random.randn(100)+3])

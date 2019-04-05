@@ -1,9 +1,14 @@
-import unittest
-import numpy as np
-import time
-from mpi4py import MPI
+from __future__ import unicode_literals
+from __future__ import print_function
 
-from modality import calibrated_diptest, calibrated_bwtest, silverman_bwtest, hartigan_diptest, excess_mass_modes
+import time
+import unittest
+
+import numpy as np
+# from mpi4py import MPI
+
+from modality import calibrated_diptest, calibrated_bwtest, silverman_bwtest, \
+    hartigan_diptest, excess_mass_modes
 from modality.util import auto_interval
 
 
@@ -31,8 +36,8 @@ class testModality(unittest.TestCase):
         calibrated_diptest(self.data, self.alpha, 'normal', adaptive_resampling=False)
         t4 = time.time()
 
-        print "Adaptive sampling diptest: {}, {}".format(t1-t0, t2-t1)
-        print "Non-adaptive sampling diptest: {}, {}".format(t4-t3, t3-t2)
+        print("Adaptive sampling diptest: {}, {}".format(t1-t0, t2-t1))
+        print("Non-adaptive sampling diptest: {}, {}".format(t4-t3, t3-t2))
 
     def test_calibrated_bwtest(self):
         t0 = time.time()
@@ -45,8 +50,8 @@ class testModality(unittest.TestCase):
         calibrated_bwtest(self.data, self.alpha, 'normal', self.I, adaptive_resampling=False)
         t4 = time.time()
 
-        print "Adaptive sampling bwtest: {}, {}".format(t1-t0, t2-t1)
-        print "Non-adaptive sampling bwtest: {}, {}".format(t4-t3, t3-t2)
+        print("Adaptive sampling bwtest: {}, {}".format(t1-t0, t2-t1))
+        print("Non-adaptive sampling bwtest: {}, {}".format(t4-t3, t3-t2))
 
     def test_silverman_bwtest(self):
         t0 = time.time()
@@ -55,22 +60,22 @@ class testModality(unittest.TestCase):
         silverman_bwtest(self.data, self.alpha, self.I, adaptive_resampling=False)
         t2 = time.time()
 
-        print "Adaptive sampling silverman bwtest: {}".format(t1-t0)
-        print "Non-adaptive sampling silverman bwtest: {}".format(t2-t1)
+        print("Adaptive sampling silverman bwtest: {}".format(t1-t0))
+        print("Non-adaptive sampling silverman bwtest: {}".format(t2-t1))
 
     def test_hartigan_diptest(self):
         t0 = time.time()
         hartigan_diptest(self.data)
         t1 = time.time()
 
-        print "Hartigan diptest: {}".format(t1-t0)
+        print("Hartigan diptest: {}".format(t1-t0))
 
     def test_excess_mass_modes(self):
         t0 = time.time()
         excess_mass_modes(self.data)
         t1 = time.time()
 
-        print "Finding excess mass modes: {}".format(t1-t0)
+        print("Finding excess mass modes: {}".format(t1-t0))
 
 if __name__ == '__main__':
     unittest.main()

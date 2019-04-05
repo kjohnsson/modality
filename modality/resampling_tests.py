@@ -1,13 +1,16 @@
+from __future__ import unicode_literals
 from mpi4py import MPI
 import numpy as np
 from sklearn.neighbors import KernelDensity
 
-from .util.bootstrap_MPI import bootstrap, check_equal_mpi, probability_above, MaxSampExceededException
+from .util.bootstrap_MPI import bootstrap, probability_above, \
+    MaxSampExceededException
 from .util import get_I
 from .calibration.lambda_alphas_access import load_lambda
 from . import diptest
 from .critical_bandwidth import critical_bandwidth, is_unimodal_kde
-from .critical_bandwidth_fm import fisher_marron_critical_bandwidth, is_resampled_unimodal_kde
+from .critical_bandwidth_fm import fisher_marron_critical_bandwidth, \
+    is_resampled_unimodal_kde
 
 
 def calibrated_diptest(data, alpha, null, adaptive_resampling=True, N_adaptive_max=10000,

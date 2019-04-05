@@ -1,3 +1,6 @@
+from __future__ import unicode_literals
+
+
 class LinkedList(object):
     def __init__(self, data=None):
         self._len = 0
@@ -50,6 +53,9 @@ class LinkedListIterator(object):
         except AttributeError:
             raise StopIteration
         return self.curr
+
+    # Iterator on python 3
+    __next__ = next
 
 
 class LinkedIntervals(LinkedList):

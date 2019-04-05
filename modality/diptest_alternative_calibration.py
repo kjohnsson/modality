@@ -4,16 +4,22 @@
         dip tests of modality. Journal of the Royal Statistical Society:
         Series B (Statistical Methodology), 60(3): 579–589, 1998.
 '''
+from __future__ import unicode_literals
+from __future__ import print_function
 
-import numpy as np
+try:
+    import cPickle as pickle
+except ImportError:
+    import pickle
 import os
+
+import matplotlib.pyplot as plt
+import numpy as np
 from scipy.special import beta as betafun
 from scipy.optimize import brentq
-import matplotlib.pyplot as plt
-import cPickle as pickle
 
-from diptest import cum_distr, dip_from_cdf, dip_pval_tabinterpol
-from KernelDensityDerivative import KernelDensityDerivative
+from .diptest import cum_distr, dip_from_cdf, dip_pval_tabinterpol
+from .KernelDensityDerivative import KernelDensityDerivative
 
 
 def calibrated_dip_test(data, N_bootstrap=1000):

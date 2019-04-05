@@ -1,3 +1,5 @@
+from __future__ import unicode_literals
+
 from mpi4py import MPI
 
 from ..util.bootstrap_MPI import probability_above
